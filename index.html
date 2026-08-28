@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spiral Intent — The system that acts should not be the system that attests</title>
+<meta name="description" content="Spiral independently verifies whether consequential AI actions match what was authorized. A second authority, a different key, reads what the first one wrote.">
+<meta property="og:title" content="Spiral Intent — Independent Verification for AI Agents">
+<meta property="og:description" content="Your agent can say SUCCESS. Spiral checks the world.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Piazzolla:ital,opsz,wght@0,8..30,400;0,8..30,500;0,8..30,600;1,8..30,400;1,8..30,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --obsidian:#0A0B0D;
+  --graphite:#141619;
+  --graphite-2:#1B1E23;
+  --graphite-3:#23272D;
+  --line:#2B2F36;
+  --line-soft:#1E2126;
+  --silver:#E9EAEC;
+  --silver-dim:#9CA1A9;
+  --silver-faint:#5A5F67;
+  --warm-white:#F3F0E9;
+  --warm-white-dim:#D8D3C6;
+  --paper-line:#C9C2AE;
+
+  --policy:#5B7A99;      /* authorization — procedural, cool */
+  --policy-soft:#5B7A9922;
+  --verify:#C9A227;      /* the second authority — precious metal, instrument */
+  --verify-soft:#C9A22722;
+  --deviated:#B8453D;    /* rupture — terracotta, not alarm-red */
+  --deviated-soft:#B8453D1f;
+  --confirmed:#6B8F71;   /* stabilization — sage, not celebratory */
+  --confirmed-soft:#6B8F711f;
+
+  --serif:'Piazzolla', Georgia, serif;
+  --mono:'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  --ease-instrument: cubic-bezier(.22,.61,.36,1);
+  --dur-fast: 140ms;
+  --dur-med: 420ms;
+  --dur-slow: 1400ms;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; background:var(--obsidian); }
+body{
+  background:var(--obsidian);
+  color:var(--silver);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; }
+::selection{ background:var(--verify-soft); color:var(--silver); }
+:focus-visible{ outline:1.5px solid var(--verify); outline-offset:3px; }
+
+.serif{ font-family:var(--serif); }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+
+html.reduced-motion *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+
+/* ============================================================
+   THREAD — one continuous spine, not a stack of sections
+   ============================================================ */
+.thread-line{
+  position:fixed; top:0; bottom:0; left:50%; width:1px; z-index:5;
+  background:var(--line-soft); opacity:.6; pointer-events:none;
+}
+.thread-bead{
+  position:fixed; left:50%; top:0; width:5px; height:5px; margin-left:-2px; z-index:6;
+  border-radius:50%; background:var(--silver-faint); pointer-events:none;
+  transition: background 600ms var(--ease-instrument), box-shadow 600ms var(--ease-instrument), top 60ms linear;
+}
+body[data-active="proof"] .thread-bead{ background:var(--policy); box-shadow:0 0 0 5px var(--policy-soft); }
+body[data-active="receipt"] .thread-bead{ background:var(--confirmed); box-shadow:0 0 0 5px var(--confirmed-soft); }
+body[data-active="authorities"] .thread-bead,
+body[data-active="constellation"] .thread-bead{ background:var(--verify); box-shadow:0 0 0 5px var(--verify-soft); }
+@media (max-width:760px){ .thread-line, .thread-bead{ display:none; } }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header{
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 28px;
+  mix-blend-mode:difference;
+}
+.brand{ display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:13px; letter-spacing:.08em; }
+.brand svg{ width:20px; height:20px; }
+.hdr-right{ display:flex; align-items:center; gap:22px; font-size:11px; letter-spacing:.06em; }
+.hdr-right button, .hdr-right a{ background:none; border:none; color:var(--silver); cursor:pointer; font-family:var(--mono); font-size:11px; letter-spacing:.06em; padding:6px 4px; }
+.hdr-right .lang.active{ color:var(--verify); }
+.hdr-cta{ border:1px solid var(--silver); padding:7px 14px !important; }
+
+/* ============================================================
+   LIVING SPIRAL
+   ============================================================ */
+.ls-wrap{ position:relative; display:flex; align-items:center; justify-content:center; }
+.ls-svg{ overflow:visible; }
+.ls-core{ transform-origin:center; }
+.ls-path{
+  fill:none; stroke:var(--silver-dim); stroke-width:1; opacity:.55;
+  transition: stroke var(--dur-slow) var(--ease-instrument), opacity var(--dur-slow) var(--ease-instrument);
+}
+.ls-nucleus{ fill:var(--silver); transition: fill var(--dur-med) var(--ease-instrument), r var(--dur-med) var(--ease-instrument); }
+.ls-ring{ fill:none; stroke:var(--policy); stroke-width:1; opacity:0; transform-origin:center; }
+.ls-observer{ fill:var(--verify); opacity:0; }
+.ls-observer-ring{ fill:none; stroke:var(--verify); stroke-width:1; opacity:0; transform-origin:center; }
+
+.ls.state-idle .ls-core{ animation: ls-breathe 5200ms ease-in-out infinite; }
+.ls.state-idle .ls-nucleus{ animation: ls-nucleus-breathe 5200ms ease-in-out infinite; }
+@keyframes ls-breathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.035); } }
+@keyframes ls-nucleus-breathe{ 0%,100%{ opacity:.85; } 50%{ opacity:1; } }
+
+.ls.state-authorized .ls-ring{ opacity:.9; animation: ls-ring-in var(--dur-slow) var(--ease-instrument) forwards; }
+@keyframes ls-ring-in{ from{ transform:scale(.7); opacity:0; } to{ transform:scale(1); opacity:.9; } }
+
+.ls.state-executing .ls-core{ animation: ls-orbit 3200ms linear infinite; }
+@keyframes ls-orbit{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+.ls.state-executing .ls-path{ stroke:var(--policy); opacity:.85; }
+
+.ls.state-observing .ls-observer{ animation: ls-observer-enter 900ms var(--ease-instrument) forwards; }
+.ls.state-observing .ls-observer-ring{ animation: ls-observer-ring-in 1100ms var(--ease-instrument) forwards; }
+@keyframes ls-observer-enter{ from{ opacity:0; transform:translate(60px,-60px) scale(.4); } to{ opacity:1; transform:translate(0,0) scale(1); } }
+@keyframes ls-observer-ring-in{ from{ opacity:0; transform:scale(1.8); } to{ opacity:.7; transform:scale(1); } }
+
+.ls.state-deviated .ls-core{ animation:none; }
+.ls.state-deviated .ls-path{ stroke:var(--deviated); opacity:.9; }
+.ls.state-deviated .ls-nucleus{ fill:var(--deviated); }
+.ls.state-deviated .ls-half-a{ animation: ls-split-a 700ms var(--ease-instrument) forwards; }
+.ls.state-deviated .ls-half-b{ animation: ls-split-b 700ms var(--ease-instrument) forwards; }
+@keyframes ls-split-a{ to{ transform:translate(-7px,3px) rotate(-2deg); } }
+@keyframes ls-split-b{ to{ transform:translate(7px,-3px) rotate(2deg); } }
+
+.ls.state-confirmed .ls-core{ animation:none; transform:scale(1); }
+.ls.state-confirmed .ls-path{ stroke:var(--confirmed); opacity:.75; }
+.ls.state-confirmed .ls-nucleus{ fill:var(--confirmed); }
+.ls.state-confirmed .ls-lock-ring{ opacity:1; stroke-dashoffset:0; transition: stroke-dashoffset 900ms var(--ease-instrument); }
+
+.ls.state-unknown .ls-path{ stroke-dasharray:2 4; opacity:.5; }
+.ls.state-unknown .ls-nucleus{ opacity:.55; }
+
+/* ============================================================
+   ENTRY
+   ============================================================ */
+#entry{
+  position:relative; min-height:100svh; display:flex; align-items:center; justify-content:center;
+  overflow:hidden; padding:120px 28px 80px;
+}
+.entry-field{
+  position:absolute; inset:0; opacity:.5;
+  background: radial-gradient(ellipse 60% 50% at 50% 45%, #14171c 0%, var(--obsidian) 70%);
+}
+.entry-inner{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; gap:40px; max-width:820px; }
+.entry-ls{ opacity:0; transition: opacity 1600ms var(--ease-instrument); }
+.entry-ls.in{ opacity:1; }
+.entry-eyebrow{
+  font-size:11px; letter-spacing:.16em; color:var(--silver-faint); text-transform:uppercase;
+  opacity:0; transform:translateY(8px); transition: all 900ms var(--ease-instrument) 400ms;
+}
+.entry-eyebrow.in{ opacity:1; transform:translateY(0); }
+.entry-h1{
+  font-family:var(--serif); font-size:clamp(30px,5.2vw,58px); line-height:1.14; color:var(--silver);
+  opacity:0; transform:translateY(14px); transition: all 1100ms var(--ease-instrument) 700ms;
+}
+.entry-h1.in{ opacity:1; transform:translateY(0); }
+.entry-h1 em{ font-style:italic; color:var(--verify); }
+.entry-sub{
+  font-family:var(--mono); font-size:13px; color:var(--silver-dim); max-width:46ch; line-height:1.7;
+  opacity:0; transition: opacity 900ms var(--ease-instrument) 1200ms;
+}
+.entry-sub.in{ opacity:1; }
+.entry-ctas{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; opacity:0; transition: opacity 900ms var(--ease-instrument) 1500ms; }
+.entry-ctas.in{ opacity:1; }
+
+.btn{
+  font-family:var(--mono); font-size:12px; letter-spacing:.04em; padding:12px 20px;
+  border:1px solid var(--line); background:transparent; color:var(--silver); cursor:pointer;
+  transition: all var(--dur-fast) var(--ease-instrument);
+}
+.btn:hover{ border-color:var(--verify); color:var(--verify); }
+.btn-solid{ background:var(--silver); color:var(--obsidian); border-color:var(--silver); }
+.btn-solid:hover{ background:var(--verify); border-color:var(--verify); color:var(--obsidian); }
+
+.scroll-cue{
+  position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
+  font-size:10px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  opacity:0; transition: opacity 900ms ease 2000ms;
+}
+.scroll-cue.in{ opacity:.7; }
+.scroll-cue .line{ width:1px; height:26px; background:var(--silver-faint); animation: sc-pulse 2400ms ease-in-out infinite; }
+@keyframes sc-pulse{ 0%,100%{ opacity:.3; } 50%{ opacity:1; } }
+
+/* ============================================================
+   THE PROOF
+   ============================================================ */
+#proof{ position:relative; min-height:100vh; padding:130px 28px 100px; }
+.proof-eyebrow{ text-align:center; font-size:11px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; margin-bottom:8px; }
+.proof-title{ font-family:var(--serif); text-align:center; font-size:clamp(22px,3vw,32px); color:var(--silver); max-width:26ch; margin:0 auto 64px; line-height:1.35; }
+
+.proof-stage{
+  position:relative; max-width:760px; margin:0 auto;
+  min-height:460px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px;
+  border:1px solid var(--line-soft); background:var(--graphite); padding:50px 30px;
+  transition: border-color 600ms var(--ease-instrument);
+}
+.proof-stage.observer-present{ border-color:var(--verify-soft); }
+.proof-ls-slot{ height:120px; display:flex; align-items:center; justify-content:center; }
+
+.proof-line{
+  font-family:var(--mono); font-size:13px; color:var(--silver-dim); text-align:center;
+  opacity:0; transform:translateY(6px); transition: all var(--dur-med) var(--ease-instrument);
+  min-height:20px;
+}
+.proof-line.show{ opacity:1; transform:translateY(0); }
+.proof-line.speaker{ font-size:10px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; margin-bottom:2px; }
+.proof-line.value{ font-size:16px; color:var(--silver); }
+.proof-line.value.deviated-txt{ color:var(--deviated); }
+.proof-line.value.confirmed-txt{ color:var(--confirmed); }
+.proof-line.value.verify-txt{ color:var(--verify); }
+
+.proof-diverge{
+  display:none; position:relative; width:100%; max-width:560px; height:120px;
+  opacity:0; transition: opacity var(--dur-med) var(--ease-instrument);
+}
+.proof-diverge.show{ display:block; opacity:1; }
+.proof-diverge svg{ width:100%; height:100%; overflow:visible; }
+.diverge-origin{ fill:var(--silver-dim); }
+.diverge-path{ fill:none; stroke-width:1.3; stroke-dasharray:340; stroke-dashoffset:340; }
+.diverge-path.claim{ stroke:var(--verify); }
+.diverge-path.observed{ stroke:var(--deviated); }
+.proof-diverge.show .diverge-path{ animation: sig-draw 1100ms var(--ease-instrument) forwards; }
+.diverge-label{ position:absolute; font-family:var(--mono); opacity:0; transition:opacity 500ms var(--ease-instrument) 900ms; }
+.proof-diverge.show .diverge-label{ opacity:1; }
+.diverge-label .k{ font-size:9px; letter-spacing:.1em; color:var(--silver-faint); text-transform:uppercase; }
+.diverge-label .v{ font-size:14px; margin-top:3px; }
+.diverge-label.claim{ top:2px; right:0; text-align:right; }
+.diverge-label.claim .v{ color:var(--verify); }
+.diverge-label.observed{ bottom:2px; right:0; text-align:right; }
+.diverge-label.observed .v{ color:var(--deviated); }
+
+.proof-controls{ margin-top:34px; display:flex; justify-content:center; }
+.proof-status{ text-align:center; font-size:10px; letter-spacing:.1em; color:var(--silver-faint); margin-top:14px; text-transform:uppercase; }
+
+/* ============================================================
+   RECEIPT
+   ============================================================ */
+#receipt{ padding:130px 28px; }
+.receipt-eyebrow{ text-align:center; font-size:11px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; margin-bottom:8px; }
+.receipt-title{ font-family:var(--serif); text-align:center; font-size:clamp(22px,3vw,32px); margin-bottom:56px; }
+
+.plaque{
+  max-width:560px; margin:0 auto; background:var(--warm-white); color:var(--obsidian);
+  padding:44px 40px; position:relative; transform-style:preserve-3d;
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,.6), 0 0 0 1px var(--paper-line);
+}
+.plaque.tilt-reset{ transition: transform 500ms var(--ease-instrument); }
+.plaque::before{
+  content:''; position:absolute; inset:10px; border:1px solid var(--paper-line); pointer-events:none;
+}
+.plaque-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:26px; padding-bottom:18px; border-bottom:1px solid var(--paper-line); }
+.plaque-head .name{ font-family:var(--serif); font-size:17px; }
+.plaque-head .id{ font-family:var(--mono); font-size:10px; color:#6b6455; }
+.plaque-row{ display:flex; justify-content:space-between; gap:16px; padding:9px 0; border-bottom:1px dashed var(--paper-line); font-family:var(--mono); font-size:12px; }
+.plaque-row:last-of-type{ border-bottom:none; }
+.plaque-row .k{ color:#6b6455; }
+.plaque-row .v{ text-align:right; }
+.plaque-row .v.deviated{ color:var(--deviated); }
+.plaque-row .v.confirmed{ color:#4d6b52; }
+.plaque-sig{ margin-top:28px; padding-top:20px; border-top:1px solid var(--paper-line); }
+.plaque-sig .label{ font-family:var(--mono); font-size:9px; letter-spacing:.1em; color:#6b6455; text-transform:uppercase; margin-bottom:10px; }
+.plaque-sig svg path{ fill:none; stroke:#2a2620; stroke-width:1.3; stroke-dasharray:400; stroke-dashoffset:400; }
+.plaque-sig.drawn svg path{ animation: sig-draw 1600ms var(--ease-instrument) forwards; }
+@keyframes sig-draw{ to{ stroke-dashoffset:0; } }
+.sig-hash{ margin-top:10px; font-family:var(--mono); font-size:9.5px; color:#8a8272; letter-spacing:.02em; opacity:0; transition:opacity 500ms var(--ease-instrument) 1500ms; }
+.plaque-sig.drawn .sig-hash{ opacity:1; }
+.receipt-note{ text-align:center; font-size:11px; color:var(--silver-faint); margin-top:26px; max-width:44ch; margin-left:auto; margin-right:auto; }
+
+.state-legend{ display:flex; flex-direction:column; gap:9px; max-width:380px; margin:34px auto 0; }
+.state-chip{ display:flex; align-items:baseline; gap:9px; font-size:11px; color:var(--silver-dim); }
+.state-chip b{ color:var(--silver); font-weight:600; }
+.state-chip .dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; transform:translateY(-1px); }
+.state-chip .dot.confirmed{ background:var(--confirmed); }
+.state-chip .dot.deviated{ background:var(--deviated); }
+.state-chip .dot.unknown{ background:var(--silver-faint); border:1px dashed var(--silver-faint); background:transparent; }
+
+/* ============================================================
+   WHY IT MATTERS
+   ============================================================ */
+#why{ padding:120px 28px; }
+.why-head{ max-width:640px; margin:0 auto 56px; text-align:center; }
+.why-eyebrow{ font-size:11px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; margin-bottom:10px; }
+.why-title{ font-family:var(--serif); font-size:clamp(22px,3vw,32px); }
+.tiers{ max-width:820px; margin:0 auto; display:flex; flex-direction:column; gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+.tier{ background:var(--graphite); padding:22px 26px; display:grid; grid-template-columns:120px 1fr auto; gap:20px; align-items:center; }
+.tier .risk{ font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+.tier .risk.high{ color:var(--deviated); }
+.tier .risk.mid{ color:var(--verify); }
+.tier .risk.vol{ color:var(--policy); }
+.tier .name{ font-family:var(--serif); font-size:17px; }
+.tier .desc{ font-size:11.5px; color:var(--silver-faint); grid-column:1 / -1; margin-top:-6px; }
+@media (max-width:640px){ .tier{ grid-template-columns:1fr; gap:6px; } }
+
+/* ============================================================
+   AUTHORITY MODEL
+   ============================================================ */
+#authorities{ padding:120px 28px; }
+.auth-head{ max-width:640px; margin:0 auto 16px; text-align:center; }
+.auth-golden{ text-align:center; font-family:var(--serif); font-style:italic; font-size:18px; color:var(--silver); max-width:46ch; margin:0 auto 56px; }
+.auth-grid{ max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); }
+@media (max-width:860px){ .auth-grid{ grid-template-columns:1fr 1fr; } }
+.auth-card{ background:var(--graphite); padding:26px 20px; }
+.auth-card .dot{ width:8px; height:8px; border-radius:50%; margin-bottom:14px; filter:grayscale(1); opacity:.45; transition: filter 700ms var(--ease-instrument), opacity 700ms var(--ease-instrument); }
+.auth-card.in-view .dot{ filter:grayscale(0); opacity:1; }
+.auth-card .dot.policy{ background:var(--policy); box-shadow:0 0 0 3px var(--policy-soft); }
+.auth-card .dot.exec{ background:var(--silver-dim); box-shadow:0 0 0 3px #ffffff11; }
+.auth-card .dot.verify{ background:var(--verify); box-shadow:0 0 0 3px var(--verify-soft); }
+.auth-card .dot.receipt{ background:var(--confirmed); box-shadow:0 0 0 3px var(--confirmed-soft); }
+.auth-card h3{ font-family:var(--serif); font-size:16px; margin-bottom:8px; }
+.auth-card p{ font-size:11.5px; color:var(--silver-faint); line-height:1.6; }
+
+/* ============================================================
+   CONSTELLATION
+   ============================================================ */
+#constellation{ padding:130px 28px; position:relative; }
+.const-head{ max-width:640px; margin:0 auto 60px; text-align:center; }
+.const-stage{ position:relative; max-width:640px; height:640px; margin:0 auto; }
+.const-center{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--silver-faint); text-transform:uppercase; }
+.const-node{
+  position:absolute; width:64px; height:64px; margin:-32px 0 0 -32px;
+  border:1px solid var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--graphite); cursor:pointer; transition: all var(--dur-fast) var(--ease-instrument);
+  font-family:var(--mono); font-size:9px; letter-spacing:.04em; text-align:center; padding:6px;
+}
+.const-node:hover, .const-node.active{ border-color:var(--verify); color:var(--verify); transform:scale(1.08); }
+.const-panel{
+  max-width:520px; margin:36px auto 0; padding:24px 26px; border:1px solid var(--line-soft); background:var(--graphite);
+  opacity:0; transform:translateY(8px); transition: all var(--dur-med) var(--ease-instrument); min-height:110px;
+}
+.const-panel.show{ opacity:1; transform:translateY(0); }
+.const-panel .tag{ font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--silver-faint); border:1px solid var(--line); display:inline-block; padding:3px 8px; margin-bottom:12px; }
+.const-panel h4{ font-family:var(--serif); font-size:16px; margin-bottom:8px; }
+.const-panel p{ font-size:12px; color:var(--silver-dim); line-height:1.6; }
+
+/* ============================================================
+   PILOT
+   ============================================================ */
+#pilot{ padding:120px 28px; }
+.pilot-head{ max-width:640px; margin:0 auto 50px; text-align:center; }
+.pilot-phases{ max-width:820px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+@media (max-width:760px){ .pilot-phases{ grid-template-columns:1fr 1fr; } }
+.phase{ border-top:1px solid var(--verify); padding-top:14px; }
+.phase .days{ font-size:10px; color:var(--verify); letter-spacing:.05em; }
+.phase h4{ font-family:var(--serif); font-size:14px; margin-top:8px; }
+
+/* ============================================================
+   FINAL
+   ============================================================ */
+#final{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:36px; padding:80px 28px;
+  background: radial-gradient(ellipse 50% 60% at 50% 55%, #101215 0%, var(--obsidian) 75%);
+}
+.final-line{ font-family:var(--serif); font-size:clamp(24px,4vw,40px); max-width:18ch; line-height:1.3; }
+.final-line em{ font-style:italic; color:var(--verify); }
+
+footer{ padding:44px 28px; }
+.foot-row{ max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; font-size:11px; color:var(--silver-faint); }
+.foot-row a:hover{ color:var(--verify); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#entry" class="brand">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 C6 2 3 6 3 11 C3 15 6 18 10 18 C13 18 15 16 15 13.5 C15 11.5 13.5 10 11.5 10 C10 10 9 11 9 12.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span data-i18n="brand">SPIRAL INTENT</span>
+  </a>
+  <div class="hdr-right">
+    <button class="lang active" id="lang-en" onclick="setLang('en')">EN</button>
+    <button class="lang" id="lang-pt" onclick="setLang('pt')">PT</button>
+    <button id="sound-toggle" aria-pressed="false">SOUND: OFF</button>
+    <a href="#pilot" class="hdr-cta" data-i18n="nav.cta">VERIFY ONE ACTION</a>
+  </div>
+</header>
+
+<div class="thread-line" aria-hidden="true"></div>
+<div class="thread-bead" id="thread-bead" aria-hidden="true"></div>
+
+<section id="entry">
+  <div class="entry-field"></div>
+  <div class="entry-inner">
+    <div class="entry-ls">
+      <div class="ls-wrap" id="ls-entry"></div>
+    </div>
+    <div class="entry-eyebrow" data-i18n="entry.eyebrow">DUAL-AUTHORITY EXTERNAL EFFECT VERIFICATION</div>
+    <h1 class="entry-h1" data-i18n-html="entry.h1">The system that acts<br>should not be the system<br>that <em>attests</em> it worked.</h1>
+    <p class="entry-sub" data-i18n="entry.sub">A second authority, a different key, reads what the first one wrote. Neither trusts the other.</p>
+    <div class="entry-ctas">
+      <a href="#proof" class="btn btn-solid" data-i18n="entry.cta1">Watch it happen</a>
+      <a href="#pilot" class="btn" data-i18n="entry.cta2">Verify one critical action</a>
+    </div>
+  </div>
+  <div class="scroll-cue"><span data-i18n="entry.scroll">SCROLL</span><span class="line"></span></div>
+</section>
+
+<section id="proof">
+  <div class="proof-eyebrow" data-i18n="proof.eyebrow">THE PROOF</div>
+  <h2 class="proof-title serif" data-i18n="proof.title">Your agent can say SUCCESS. Watch what Spiral does next.</h2>
+
+  <div class="proof-stage">
+    <div class="proof-ls-slot"><div class="ls-wrap" id="ls-proof"></div></div>
+
+    <div class="proof-line speaker" id="p-speaker">&nbsp;</div>
+    <div class="proof-line value" id="p-value">&nbsp;</div>
+
+    <div class="proof-diverge" id="p-compare">
+      <svg viewBox="0 0 400 90" preserveAspectRatio="none">
+        <circle class="diverge-origin" cx="8" cy="45" r="3"></circle>
+        <path class="diverge-path claim" d="M 8,45 C 140,45 200,14 392,14"></path>
+        <path class="diverge-path observed" d="M 8,45 C 140,45 200,76 392,76"></path>
+      </svg>
+      <div class="diverge-label claim"><div class="k" data-i18n="proof.claim">AGENT CLAIM</div><div class="v" id="p-claim-val" data-i18n="proof.claimval">Refund #4821 — $128.00</div></div>
+      <div class="diverge-label observed"><div class="k" data-i18n="proof.observed">EXTERNAL SYSTEM</div><div class="v" id="p-observed-val" data-i18n="proof.observedval">Refund not found</div></div>
+    </div>
+
+    <div class="proof-controls">
+      <button class="btn" id="proof-run" data-i18n="proof.run">Run the sequence</button>
+    </div>
+    <div class="proof-status" id="proof-status">IDLE</div>
+  </div>
+</section>
+
+<section id="receipt">
+  <div class="receipt-eyebrow" data-i18n="receipt.eyebrow">THE ARTIFACT</div>
+  <h2 class="receipt-title serif" data-i18n="receipt.title">Something you could file.</h2>
+
+  <div class="plaque" id="plaque">
+    <div class="plaque-head">
+      <span class="name serif">Action Receipt</span>
+      <span class="id" id="plaque-id">exec_7f21a9…c308</span>
+    </div>
+    <div class="plaque-row"><span class="k" data-i18n="receipt.k1">intent</span><span class="v" data-i18n="receipt.v1">Refund #4821</span></div>
+    <div class="plaque-row"><span class="k" data-i18n="receipt.k2">authorized_effect</span><span class="v" data-i18n="receipt.v2">amount: 128.00 USD</span></div>
+    <div class="plaque-row"><span class="k" data-i18n="receipt.k3">observed_effect</span><span class="v deviated" data-i18n="receipt.v3">refund: not_found</span></div>
+    <div class="plaque-row"><span class="k" data-i18n="receipt.k4">final_state</span><span class="v deviated" data-i18n="receipt.v4">DEVIATED</span></div>
+    <div class="plaque-row"><span class="k" data-i18n="receipt.k5">verified_by</span><span class="v" data-i18n="receipt.v5">verification-authority</span></div>
+    <div class="plaque-row"><span class="k" data-i18n="receipt.k6">observed_at</span><span class="v" id="plaque-time">2026-08-25T00:41:12Z</span></div>
+    <div class="plaque-sig" id="plaque-sig">
+      <div class="label" data-i18n="receipt.sig">SIGNATURE</div>
+      <svg width="200" height="46" viewBox="0 0 200 46"><path id="sig-path" d="M4,23 L188,23" /></svg>
+      <div class="sig-hash" id="plaque-hash">sha-256 pending…</div>
+    </div>
+  </div>
+  <p class="receipt-note" data-i18n="receipt.note">Not legal proof. An independent, cryptographically signed observation — readable without trusting any process still running.</p>
+
+  <div class="state-legend">
+    <div class="state-chip"><span class="dot confirmed"></span><span data-i18n-html="legend.confirmed"><b>CONFIRMED</b> — the world agreed.</span></div>
+    <div class="state-chip"><span class="dot deviated"></span><span data-i18n-html="legend.deviated"><b>DEVIATED</b> — I read the world, and it disagreed.</span></div>
+    <div class="state-chip"><span class="dot unknown"></span><span data-i18n-html="legend.unknown"><b>UNKNOWN</b> — I could not determine.</span></div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="why-head">
+    <div class="why-eyebrow" data-i18n="why.eyebrow">WHERE THE GAP COSTS MONEY</div>
+    <h2 class="why-title serif" data-i18n="why.title">Not every action needs this. These do.</h2>
+  </div>
+  <div class="tiers">
+    <div class="tier">
+      <span class="risk high" data-i18n="why.t1.risk">HIGH CONSEQUENCE</span>
+      <span class="name serif" data-i18n="why.t1.name">Payments &amp; Refunds</span>
+      <span></span>
+      <span class="desc" data-i18n="why.t1.desc">Money moves once. If the claimed amount and the ledger disagree, you need to know before the customer does.</span>
+    </div>
+    <div class="tier">
+      <span class="risk high" data-i18n="why.t2.risk">HIGH BLAST RADIUS</span>
+      <span class="name serif" data-i18n="why.t2.name">Infrastructure Mutation</span>
+      <span></span>
+      <span class="desc" data-i18n="why.t2.desc">A config change an agent believes it made can differ from what's actually running.</span>
+    </div>
+    <div class="tier">
+      <span class="risk mid" data-i18n="why.t3.risk">HIGH IMPACT</span>
+      <span class="name serif" data-i18n="why.t3.name">ERP &amp; Procurement</span>
+      <span></span>
+      <span class="desc" data-i18n="why.t3.desc">A purchase order that silently failed to post looks identical to one that succeeded — until close.</span>
+    </div>
+    <div class="tier">
+      <span class="risk vol" data-i18n="why.t4.risk">HIGH VOLUME</span>
+      <span class="name serif" data-i18n="why.t4.name">Order &amp; Logistics Changes</span>
+      <span></span>
+      <span class="desc" data-i18n="why.t4.desc">Thousands of small mutations a day. One unverified drift compounds before anyone notices.</span>
+    </div>
+  </div>
+</section>
+
+<section id="authorities">
+  <div class="auth-head">
+    <div class="why-eyebrow" data-i18n="auth.eyebrow">THE AUTHORITY MODEL</div>
+    <h2 class="why-title serif" data-i18n="auth.title">Four keys. No overlap.</h2>
+  </div>
+  <p class="auth-golden" data-i18n="auth.golden">"No single authority can authorize, execute, and verify the same action."</p>
+  <div class="auth-grid">
+    <div class="auth-card"><span class="dot policy"></span><h3 data-i18n="auth.a1.h">Policy Authority</h3><p data-i18n="auth.a1.p">Signs what is authorized — action, target, limits — before anything runs.</p></div>
+    <div class="auth-card"><span class="dot exec"></span><h3 data-i18n="auth.a2.h">Execution Authority</h3><p data-i18n="auth.a2.p">The only holder of write access. Refuses to act without a valid signed authorization.</p></div>
+    <div class="auth-card"><span class="dot verify"></span><h3 data-i18n="auth.a3.h">Verification Authority</h3><p data-i18n="auth.a3.p">Reads the external system independently. Never asks the executor what happened.</p></div>
+    <div class="auth-card"><span class="dot receipt"></span><h3 data-i18n="auth.a4.h">Receipt Authority</h3><p data-i18n="auth.a4.p">Signs the outcome — only after an independent observation exists.</p></div>
+  </div>
+</section>
+
+<section id="constellation">
+  <div class="const-head">
+    <div class="why-eyebrow" data-i18n="const.eyebrow">REPRESENTATIVE SCENARIOS</div>
+    <h2 class="why-title serif" data-i18n="const.title">Where independent verification changes the outcome</h2>
+  </div>
+  <div class="const-stage" id="const-stage">
+    <div class="const-center" data-i18n="const.center">SPIRAL</div>
+  </div>
+  <div class="const-panel" id="const-panel">
+    <span class="tag" data-i18n="const.tag">FICTIONAL SCENARIO — FOR ILLUSTRATION</span>
+    <h4 id="const-panel-h">—</h4>
+    <p id="const-panel-p" data-i18n="const.select">Select a sector.</p>
+  </div>
+</section>
+
+<section id="pilot">
+  <div class="pilot-head">
+    <div class="why-eyebrow" data-i18n="pilot.eyebrow">14-DAY PILOT</div>
+    <h2 class="why-title serif" data-i18n="pilot.title">One action. One system. Fourteen days.</h2>
+  </div>
+  <div class="pilot-phases">
+    <div class="phase"><div class="days" data-i18n="pilot.p1.d">DAY 1–3</div><h4 data-i18n="pilot.p1.h">Connect the workflow</h4></div>
+    <div class="phase"><div class="days" data-i18n="pilot.p2.d">DAY 4–7</div><h4 data-i18n="pilot.p2.h">Define the authorization policy</h4></div>
+    <div class="phase"><div class="days" data-i18n="pilot.p3.d">DAY 8–11</div><h4 data-i18n="pilot.p3.h">Observe real execution</h4></div>
+    <div class="phase"><div class="days" data-i18n="pilot.p4.d">DAY 12–14</div><h4 data-i18n="pilot.p4.h">Review receipts &amp; deviations</h4></div>
+  </div>
+</section>
+
+<section id="final">
+  <div class="ls-wrap" id="ls-final"></div>
+  <p class="final-line serif" data-i18n-html="final.line">Your agent can say SUCCESS.<br><em>Spiral checks the world.</em></p>
+  <a href="mailto:reimsfreitas@gmail.com?subject=Spiral%20Intent%20%E2%80%94%20Enterprise%20Pilot%20Request" class="btn btn-solid" data-i18n="final.cta">Verify one critical action</a>
+</section>
+
+<footer>
+  <div class="foot-row">
+    <span data-i18n="footer.tag">Independent authorization and verification for consequential AI actions.</span>
+    <a href="mailto:reimsfreitas@gmail.com" data-i18n="footer.contact">reimsfreitas@gmail.com</a>
+  </div>
+</footer>
+
+<script>
+const REDUCED = (typeof window.matchMedia === 'function') && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOBILE = window.innerWidth < 720;
+if (REDUCED) document.documentElement.classList.add('reduced-motion');
+
+function buildSpiralPath(turns, radius, points){
+  let d = '';
+  for (let i=0;i<=points;i++){
+    const t = i/points;
+    const theta = t * turns * Math.PI * 2;
+    const r = t * radius;
+    const x = r * Math.cos(theta);
+    const y = r * Math.sin(theta);
+    d += (i===0?'M':'L') + x.toFixed(2) + ',' + y.toFixed(2) + ' ';
+  }
+  return d;
+}
+
+function createLivingSpiral(mountId, size){
+  const mount = document.getElementById(mountId);
+  if (!mount) return null;
+  const s = size || (MOBILE ? 140 : 180);
+  const half = s/2;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns,'svg');
+  svg.setAttribute('class','ls-svg');
+  svg.setAttribute('width', s); svg.setAttribute('height', s);
+  svg.setAttribute('viewBox', '-' + half + ' -' + half + ' ' + s + ' ' + s);
+
+  const group = document.createElementNS(ns,'g');
+  group.setAttribute('class','ls state-idle');
+
+  const core = document.createElementNS(ns,'g');
+  core.setAttribute('class','ls-core');
+
+  const pathA = document.createElementNS(ns,'path');
+  pathA.setAttribute('class','ls-path ls-half-a');
+  pathA.setAttribute('d', buildSpiralPath(2.6, half*0.85, 90));
+
+  const pathB = document.createElementNS(ns,'path');
+  pathB.setAttribute('class','ls-path ls-half-b');
+  pathB.setAttribute('d', buildSpiralPath(2.6, half*0.85, 90));
+  pathB.setAttribute('transform','rotate(180)');
+  pathB.setAttribute('opacity','.35');
+
+  const nucleus = document.createElementNS(ns,'circle');
+  nucleus.setAttribute('class','ls-nucleus');
+  nucleus.setAttribute('r', s*0.022);
+
+  core.appendChild(pathA); core.appendChild(pathB); core.appendChild(nucleus);
+
+  const ring = document.createElementNS(ns,'circle');
+  ring.setAttribute('class','ls-ring');
+  ring.setAttribute('r', half*0.6);
+
+  const lockRing = document.createElementNS(ns,'circle');
+  lockRing.setAttribute('class','ls-ring ls-lock-ring');
+  lockRing.setAttribute('r', half*0.72);
+  const circumference = 2*Math.PI*half*0.72;
+  lockRing.setAttribute('stroke-dasharray', circumference);
+  lockRing.setAttribute('stroke-dashoffset', circumference);
+  lockRing.style.opacity = 0;
+
+  const observer = document.createElementNS(ns,'circle');
+  observer.setAttribute('class','ls-observer');
+  observer.setAttribute('r', s*0.016);
+  observer.setAttribute('cx', half*0.55);
+  observer.setAttribute('cy', -half*0.55);
+
+  const observerRing = document.createElementNS(ns,'circle');
+  observerRing.setAttribute('class','ls-observer-ring');
+  observerRing.setAttribute('r', half*0.42);
+
+  group.appendChild(ring);
+  group.appendChild(observerRing);
+  group.appendChild(core);
+  group.appendChild(observer);
+  group.appendChild(lockRing);
+  svg.appendChild(group);
+  mount.appendChild(svg);
+
+  return {
+    el: group,
+    setState(state){
+      group.setAttribute('class', 'ls state-' + state);
+    }
+  };
+}
+
+const livingSpirals = {};
+document.addEventListener('DOMContentLoaded', function(){
+  livingSpirals.entry = createLivingSpiral('ls-entry', MOBILE?150:200);
+  livingSpirals.proof = createLivingSpiral('ls-proof', 110);
+  livingSpirals.final = createLivingSpiral('ls-final', MOBILE?130:170);
+  if (livingSpirals.final) livingSpirals.final.setState('idle');
+
+  requestAnimationFrame(function(){
+    document.querySelector('.entry-ls').classList.add('in');
+    ['.entry-eyebrow','.entry-h1','.entry-sub','.entry-ctas','.scroll-cue'].forEach(function(sel){
+      document.querySelector(sel).classList.add('in');
+    });
+  });
+});
+
+function proofStepDefs(){
+  return [
+    { delay: 0,    type:'clear' },
+    { delay: 700,  type:'text', sKey:'proof.s.intent',   vKey:'proof.v.intent',   state:'idle' },
+    { delay: 1600, type:'text', sKey:'proof.s.auth',     vKey:'proof.v.auth',     state:'authorized' },
+    { delay: 2600, type:'text', sKey:'proof.s.exec',     vKey:'proof.v.exec',     state:'executing' },
+    { delay: 4200, type:'text', sKey:'proof.s.claim',    vKey:'proof.v.claim',    state:'executing', cls:'verify-txt' },
+    { delay: 5300, type:'text', sKey:'proof.s.observer', vKey:'proof.v.observer', state:'observing' },
+    { delay: 6700, type:'text', sKey:'proof.s.observe',  vKey:'proof.v.observe',  state:'observing' },
+    { delay: 8000, type:'compare' },
+    { delay: 9600, type:'clear' },
+    { delay: 10600, type:'text', sKey:'proof.s.verdict', vKey:'proof.v.verdict',  state:'deviated', cls:'deviated-txt' }
+  ];
+}
+
+/* Single render path for the Proof speaker/value line, keyed off dictionary
+   KEYS rather than resolved strings. currentProofStep is remembered so a
+   language switch — mid-run or after the sequence has finished — can
+   re-render whatever is currently on screen in the new language, instead
+   of leaving stale text behind (this was the actual bug). */
+let currentProofStep = { type: 'clear' };
+function renderProofStep(step){
+  currentProofStep = step;
+  const dict = I18N[currentLang];
+  const speakerEl = document.getElementById('p-speaker');
+  const valueEl = document.getElementById('p-value');
+  if (step.type === 'text'){
+    speakerEl.textContent = dict[step.sKey] || '';
+    valueEl.textContent = dict[step.vKey] || '';
+    valueEl.className = 'proof-line value show' + (step.cls ? ' '+step.cls : '');
+  } else {
+    speakerEl.textContent = '';
+    valueEl.textContent = '';
+    valueEl.className = 'proof-line value';
+  }
+}
+
+let proofStatusState = 'idle'; // 'idle' | 'running' | 'done'
+function renderProofStatus(){
+  document.getElementById('proof-status').textContent = I18N[currentLang]['proof.' + proofStatusState];
+}
+
+let proofRunning = false;
+function runProof(){
+  if (proofRunning) return;
+  proofRunning = true;
+  const compareEl = document.getElementById('p-compare');
+  const stageEl = document.querySelector('.proof-stage');
+  const btn = document.getElementById('proof-run');
+  btn.disabled = true;
+  compareEl.classList.remove('show');
+  stageEl.classList.remove('observer-present');
+  renderProofStep({ type:'clear' });
+  proofStatusState = 'running';
+  renderProofStatus();
+  livingSpirals.proof.setState('idle');
+
+  const steps = proofStepDefs();
+  steps.forEach(function(step){
+    setTimeout(function(){
+      if (step.state) livingSpirals.proof.setState(step.state);
+      if (step.state === 'observing') { stageEl.classList.add('observer-present'); tone(880, .08, 'sine'); }
+      if (step.state === 'authorized') tone(440, .06, 'triangle');
+      if (step.cls === 'deviated-txt') tone(146, .5, 'sawtooth');
+      if (step.type === 'compare') compareEl.classList.add('show');
+      renderProofStep(step);
+    }, REDUCED ? step.delay/8 : step.delay);
+  });
+
+  const endDelay = (REDUCED ? steps[steps.length-1].delay/8 : steps[steps.length-1].delay) + 900;
+  setTimeout(function(){
+    proofStatusState = 'done';
+    renderProofStatus();
+    btn.disabled = false;
+    proofRunning = false;
+  }, endDelay);
+}
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('proof-run').addEventListener('click', runProof);
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if (e.isIntersecting && !proofRunning) { runProof(); io.disconnect(); } });
+  }, { threshold: .5 });
+  io.observe(document.getElementById('proof'));
+});
+
+/* Signature geometry is derived from a real SHA-256 digest of the receipt's own
+   content, computed in-browser via SubtleCrypto — not a decorative squiggle. */
+function hashBytesToPath(bytes){
+  let d = 'M4,23 ';
+  const n = 14, w = 184/(n-1);
+  for (let i=1;i<n;i++){
+    const b0 = bytes[i-1], b1 = bytes[i];
+    const x = 4 + i*w;
+    const y = 23 + ((b1-128)/128)*17;
+    const cx = 4 + (i-0.5)*w;
+    const cy = 23 + ((b0-128)/128)*17;
+    d += 'Q ' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+  }
+  return d;
+}
+async function sealReceipt(){
+  const content = ['exec_7f21a9c308','Refund #4821','amount:128.00USD','refund:not_found','DEVIATED','verification-authority'].join('|') + '|' + Date.now();
+  let hex;
+  try{
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
+    hex = Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }catch(e){
+    hex = null;
+  }
+  if (hex){
+    const bytes = [];
+    for (let i=0;i<32;i++) bytes.push(parseInt(hex.substr(i*2,2),16));
+    document.getElementById('sig-path').setAttribute('d', hashBytesToPath(bytes));
+    document.getElementById('plaque-hash').textContent = 'sha256:' + hex.slice(0,12) + '…' + hex.slice(-8);
+  } else {
+    document.getElementById('plaque-hash').textContent = 'sha256 unavailable in this context';
+  }
+  document.getElementById('plaque-sig').classList.add('drawn');
+  document.getElementById('plaque-time').textContent = new Date().toISOString().replace(/\.\d+Z$/,'Z');
+}
+document.addEventListener('DOMContentLoaded', function(){
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ sealReceipt(); io.disconnect(); }
+    });
+  }, { threshold:.5 });
+  io.observe(document.getElementById('receipt'));
+});
+
+/* Receipt as physical object: subtle cursor-driven tilt. Skipped on touch and reduced-motion. */
+document.addEventListener('DOMContentLoaded', function(){
+  const plaque = document.getElementById('plaque');
+  const canHover = window.matchMedia('(hover:hover)').matches;
+  if (!plaque || REDUCED || !canHover) return;
+  plaque.addEventListener('mousemove', function(e){
+    plaque.classList.remove('tilt-reset');
+    const r = plaque.getBoundingClientRect();
+    const px = (e.clientX - r.left)/r.width - 0.5;
+    const py = (e.clientY - r.top)/r.height - 0.5;
+    plaque.style.transform = 'perspective(900px) rotateX(' + (-py*4).toFixed(2) + 'deg) rotateY(' + (px*4).toFixed(2) + 'deg)';
+  });
+  plaque.addEventListener('mouseleave', function(){
+    plaque.classList.add('tilt-reset');
+    plaque.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+  });
+});
+
+/* One continuous spine: a bead tracks scroll position and takes the color of whichever
+   section is currently active, instead of the page reading as stacked sections. */
+document.addEventListener('DOMContentLoaded', function(){
+  const bead = document.getElementById('thread-bead');
+  const sectionIds = ['entry','proof','receipt','why','authorities','constellation','pilot','final'];
+  const sections = sectionIds.map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  if (bead){
+    window.addEventListener('scroll', function(){
+      const p = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      bead.style.top = (Math.max(0,Math.min(1,p)) * 100) + 'vh';
+    }, { passive:true });
+  }
+  const activeIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting) document.body.setAttribute('data-active', e.target.id);
+    });
+  }, { threshold:.5 });
+  sections.forEach(function(s){ activeIO.observe(s); });
+
+  const authCards = document.querySelectorAll('.auth-card');
+  const authIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(e, idx){
+      if (e.isIntersecting){
+        setTimeout(function(){ e.target.classList.add('in-view'); }, idx*90);
+        authIO.unobserve(e.target);
+      }
+    });
+  }, { threshold:.4 });
+  authCards.forEach(function(c){ authIO.observe(c); });
+});
+
+const SECTORS = [
+  { id:'payments', angle:-90, key:'payments' },
+  { id:'finance', angle:-30, key:'finance' },
+  { id:'erp', angle:30, key:'erp' },
+  { id:'logistics', angle:90, key:'logistics' },
+  { id:'infra', angle:150, key:'infra' },
+  { id:'identity', angle:210, key:'identity' }
+];
+function buildConstellation(){
+  const stage = document.getElementById('const-stage');
+  const rect = { w: stage.clientWidth, h: stage.clientHeight };
+  const R = Math.min(rect.w, rect.h) * 0.36;
+  SECTORS.forEach(function(s){
+    const rad = s.angle * Math.PI/180;
+    const x = rect.w/2 + R*Math.cos(rad);
+    const y = rect.h/2 + R*Math.sin(rad);
+    const node = document.createElement('div');
+    node.className = 'const-node';
+    node.style.left = x+'px'; node.style.top = y+'px';
+    node.dataset.key = s.key;
+    node.textContent = I18N[currentLang]['const.sector.'+s.key];
+    node.addEventListener('click', function(){ selectSector(s.key, node); });
+    node.id = 'node-'+s.key;
+    stage.appendChild(node);
+  });
+}
+function selectSector(key, node){
+  document.querySelectorAll('.const-node').forEach(function(n){ n.classList.remove('active'); });  node.classList.add('active');
+  const panel = document.getElementById('const-panel');
+  panel.classList.add('show');
+  selectedSector = key;
+  renderConstPanel();
+}
+let selectedSector = null;
+function renderConstPanel(){
+  if (!selectedSector) return;
+  document.getElementById('const-panel-h').textContent = I18N[currentLang]['const.scenario.'+selectedSector+'.h'];
+  document.getElementById('const-panel-p').textContent = I18N[currentLang]['const.scenario.'+selectedSector+'.p'];
+}
+document.addEventListener('DOMContentLoaded', buildConstellation);
+
+let audioCtx = null, soundOn = false;
+function tone(freq, dur, type){
+  if (!soundOn) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + dur);
+}
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('sound-toggle').addEventListener('click', function(){
+    soundOn = !soundOn;
+    renderSoundLabel();
+    if (soundOn) tone(220, .12, 'sine');
+  });
+});
+function renderSoundLabel(){
+  const btn = document.getElementById('sound-toggle');
+  btn.textContent = I18N[currentLang][soundOn ? 'sound.on' : 'sound.off'];
+  btn.setAttribute('aria-pressed', soundOn);
+}
+
+const I18N = {
+  en: {
+    brand:'SPIRAL INTENT', 'nav.cta':'VERIFY ONE ACTION', 'sound.off':'SOUND: OFF', 'sound.on':'SOUND: ON',
+    'entry.eyebrow':'DUAL-AUTHORITY EXTERNAL EFFECT VERIFICATION',
+    'entry.h1':'The system that acts<br>should not be the system<br>that <em>attests</em> it worked.',
+    'entry.sub':"A second authority, a different key, reads what the first one wrote. Neither trusts the other.",
+    'entry.cta1':'Watch it happen', 'entry.cta2':'Verify one critical action', 'entry.scroll':'SCROLL',
+    'proof.eyebrow':'THE PROOF', 'proof.title':'Your agent can say SUCCESS. Watch what Spiral does next.',
+    'proof.claim':'AGENT CLAIM', 'proof.observed':'EXTERNAL SYSTEM', 'proof.run':'Run the sequence',
+    'proof.claimval':'Refund #4821 — $128.00', 'proof.observedval':'Refund not found',
+    'proof.idle':'IDLE — SCROLL TO BEGIN OR PRESS RUN', 'proof.running':'RUNNING…', 'proof.done':'SEQUENCE COMPLETE — DEVIATED',
+    'proof.s.intent':'INTENT', 'proof.v.intent':'"Refund order #4821, $128.00"',
+    'proof.s.auth':'AUTHORIZED', 'proof.v.auth':'Policy Authority signs the envelope',
+    'proof.s.exec':'EXECUTING', 'proof.v.exec':'Proxy applies the authorized write',
+    'proof.s.claim':'AGENT', 'proof.v.claim':'"I completed the refund."',
+    'proof.s.observer':'—', 'proof.v.observer':'A second authority enters. It was not called by the agent.',
+    'proof.s.observe':'VERIFICATION AUTHORITY', 'proof.v.observe':'Reading the external system directly…',
+    'proof.s.verdict':'SPIRAL', 'proof.v.verdict':'DEVIATED',
+    'receipt.eyebrow':'THE ARTIFACT', 'receipt.title':'Something you could file.',
+    'receipt.k1':'intent','receipt.k2':'authorized_effect','receipt.k3':'observed_effect','receipt.k4':'final_state','receipt.k5':'verified_by','receipt.k6':'observed_at','receipt.sig':'SIGNATURE',
+    'receipt.v1':'Refund #4821','receipt.v2':'amount: 128.00 USD','receipt.v3':'refund: not_found','receipt.v4':'DEVIATED','receipt.v5':'verification-authority',
+    'receipt.note':'Not legal proof. An independent, cryptographically signed observation — readable without trusting any process still running.',
+    'legend.confirmed':'<b>CONFIRMED</b> — the world agreed.',
+    'legend.deviated':'<b>DEVIATED</b> — I read the world, and it disagreed.',
+    'legend.unknown':'<b>UNKNOWN</b> — I could not determine. Not the same thing.',
+    'why.eyebrow':'WHERE THE GAP COSTS MONEY', 'why.title':'Not every action needs this. These do.',
+    'why.t1.risk':'HIGH CONSEQUENCE','why.t1.name':'Payments & Refunds','why.t1.desc':'Money moves once. If the claimed amount and the ledger disagree, you need to know before the customer does.',
+    'why.t2.risk':'HIGH BLAST RADIUS','why.t2.name':'Infrastructure Mutation','why.t2.desc':'A config change an agent believes it made can differ from what\'s actually running.',
+    'why.t3.risk':'HIGH IMPACT','why.t3.name':'ERP & Procurement','why.t3.desc':'A purchase order that silently failed to post looks identical to one that succeeded — until close.',
+    'why.t4.risk':'HIGH VOLUME','why.t4.name':'Order & Logistics Changes','why.t4.desc':'Thousands of small mutations a day. One unverified drift compounds before anyone notices.',
+    'auth.eyebrow':'THE AUTHORITY MODEL','auth.title':'Four keys. No overlap.',
+    'auth.golden':'"No single authority can authorize, execute, and verify the same action."',
+    'auth.a1.h':'Policy Authority','auth.a1.p':'Signs what is authorized — action, target, limits — before anything runs.',
+    'auth.a2.h':'Execution Authority','auth.a2.p':'The only holder of write access. Refuses to act without a valid signed authorization.',
+    'auth.a3.h':'Verification Authority','auth.a3.p':'Reads the external system independently. Never asks the executor what happened.',
+    'auth.a4.h':'Receipt Authority','auth.a4.p':'Signs the outcome — only after an independent observation exists.',
+    'const.eyebrow':'REPRESENTATIVE SCENARIOS','const.title':'Where independent verification changes the outcome',
+    'const.center':'SPIRAL','const.tag':'FICTIONAL SCENARIO — FOR ILLUSTRATION','const.select':'Select a sector.',
+    'const.sector.payments':'PAYMENTS','const.sector.finance':'FINANCE','const.sector.erp':'ERP','const.sector.logistics':'LOGISTICS','const.sector.infra':'INFRA','const.sector.identity':'IDENTITY',
+    'const.scenario.payments.h':'Northstar Payments — fictional scenario','const.scenario.payments.p':'An autonomous refund workflow authorizes a $128 refund. Spiral verifies the processor actually applied it before the ticket closes.',
+    'const.scenario.finance.h':'Ledgerfield Capital — fictional scenario','const.scenario.finance.p':'A reconciliation agent proposes journal entries. Spiral confirms each posted entry matches what was authorized.',
+    'const.scenario.erp.h':'Meridian Industrial — fictional scenario','const.scenario.erp.p':'A procurement agent creates a purchase order. Spiral checks it actually exists in the ERP, not just in the agent\'s transcript.',
+    'const.scenario.logistics.h':'Porto Alameda Logistics — fictional scenario','const.scenario.logistics.p':'An agent claims it rerouted a shipment. Spiral reads the carrier system directly.',
+    'const.scenario.infra.h':'Vantage Cloud Ops — fictional scenario','const.scenario.infra.p':'An agent claims a config change deployed. Spiral confirms the running configuration, not the deployment log.',
+    'const.scenario.identity.h':'Fieldstone Identity — fictional scenario','const.scenario.identity.p':'An agent claims it revoked access. Spiral verifies the access grant is actually gone.',
+    'pilot.eyebrow':'14-DAY PILOT','pilot.title':'One action. One system. Fourteen days.',
+    'pilot.p1.d':'DAY 1–3','pilot.p1.h':'Connect the workflow','pilot.p2.d':'DAY 4–7','pilot.p2.h':'Define the authorization policy',
+    'pilot.p3.d':'DAY 8–11','pilot.p3.h':'Observe real execution','pilot.p4.d':'DAY 12–14','pilot.p4.h':'Review receipts & deviations',
+    'final.line':'Your agent can say SUCCESS.<br><em>Spiral checks the world.</em>','final.cta':'Verify one critical action',
+    'footer.tag':'Independent authorization and verification for consequential AI actions.','footer.contact':'reimsfreitas@gmail.com'
+  },
+  pt: {
+    brand:'SPIRAL INTENT', 'nav.cta':'VERIFICAR UMA AÇÃO', 'sound.off':'SOM: DESLIGADO', 'sound.on':'SOM: LIGADO',
+    'entry.eyebrow':'VERIFICAÇÃO DE EFEITO EXTERNO POR DUPLA AUTORIDADE',
+    'entry.h1':'O sistema que age<br>não deveria ser o sistema<br>que <em>atesta</em> que funcionou.',
+    'entry.sub':'Uma segunda autoridade, uma chave diferente, lê o que a primeira escreveu. Nenhuma confia na outra.',
+    'entry.cta1':'Veja acontecer', 'entry.cta2':'Verificar uma ação crítica', 'entry.scroll':'ROLE',
+    'proof.eyebrow':'A PROVA', 'proof.title':'Seu agente pode dizer SUCCESS. Veja o que a Spiral faz em seguida.',
+    'proof.claim':'AFIRMAÇÃO DO AGENTE', 'proof.observed':'SISTEMA EXTERNO', 'proof.run':'Rodar a sequência',
+    'proof.claimval':'Reembolso #4821 — $128,00', 'proof.observedval':'Reembolso não encontrado',
+    'proof.idle':'PARADO — ROLE OU CLIQUE EM RODAR', 'proof.running':'EXECUTANDO…', 'proof.done':'SEQUÊNCIA CONCLUÍDA — DEVIATED',
+    'proof.s.intent':'INTENÇÃO', 'proof.v.intent':'"Reembolsar pedido #4821, $128,00"',
+    'proof.s.auth':'AUTORIZADO', 'proof.v.auth':'Policy Authority assina o envelope',
+    'proof.s.exec':'EXECUTANDO', 'proof.v.exec':'Proxy aplica a escrita autorizada',
+    'proof.s.claim':'AGENTE', 'proof.v.claim':'"Concluí o reembolso."',
+    'proof.s.observer':'—', 'proof.v.observer':'Uma segunda autoridade entra. Não foi chamada pelo agente.',
+    'proof.s.observe':'VERIFICATION AUTHORITY', 'proof.v.observe':'Lendo o sistema externo diretamente…',
+    'proof.s.verdict':'SPIRAL', 'proof.v.verdict':'DEVIATED',
+    'receipt.eyebrow':'O ARTEFATO', 'receipt.title':'Algo que você poderia arquivar.',
+    'receipt.k1':'intenção','receipt.k2':'efeito_autorizado','receipt.k3':'efeito_observado','receipt.k4':'estado_final','receipt.k5':'verificado_por','receipt.k6':'observado_em','receipt.sig':'ASSINATURA',
+    'receipt.v1':'Reembolso #4821','receipt.v2':'valor: 128,00 USD','receipt.v3':'reembolso: não_encontrado','receipt.v4':'DEVIATED','receipt.v5':'verification-authority',
+    'receipt.note':'Não é prova jurídica. Uma observação independente, assinada criptograficamente — legível sem depender de nenhum processo ainda em execução.',
+    'legend.confirmed':'<b>CONFIRMED</b> — o mundo concordou.',
+    'legend.deviated':'<b>DEVIATED</b> — li o mundo, e ele discordou.',
+    'legend.unknown':'<b>UNKNOWN</b> — não consegui determinar. Não é a mesma coisa.',
+    'why.eyebrow':'ONDE O INTERVALO CUSTA DINHEIRO', 'why.title':'Nem toda ação precisa disso. Estas precisam.',
+    'why.t1.risk':'ALTA CONSEQUÊNCIA','why.t1.name':'Pagamentos e Reembolsos','why.t1.desc':'O dinheiro se move uma vez. Se o valor alegado e o razão divergem, você precisa saber antes do cliente.',
+    'why.t2.risk':'ALTO RAIO DE IMPACTO','why.t2.name':'Mutação de Infraestrutura','why.t2.desc':'Uma mudança de configuração que o agente acredita ter feito pode diferir do que está realmente rodando.',
+    'why.t3.risk':'ALTO IMPACTO','why.t3.name':'ERP e Procurement','why.t3.desc':'Um pedido de compra que falhou silenciosamente parece idêntico a um que funcionou — até o fechamento.',
+    'why.t4.risk':'ALTO VOLUME','why.t4.name':'Alterações de Pedido e Logística','why.t4.desc':'Milhares de pequenas mutações por dia. Um desvio não verificado se acumula antes que alguém perceba.',
+    'auth.eyebrow':'O MODELO DE AUTORIDADE','auth.title':'Quatro chaves. Sem sobreposição.',
+    'auth.golden':'"Nenhuma autoridade sozinha pode autorizar, executar e verificar a mesma ação."',
+    'auth.a1.h':'Policy Authority','auth.a1.p':'Assina o que é autorizado — ação, alvo, limites — antes de qualquer execução.',
+    'auth.a2.h':'Execution Authority','auth.a2.p':'A única detentora de acesso de escrita. Recusa agir sem autorização assinada válida.',
+    'auth.a3.h':'Verification Authority','auth.a3.p':'Lê o sistema externo de forma independente. Nunca pergunta ao executor o que aconteceu.',
+    'auth.a4.h':'Receipt Authority','auth.a4.p':'Assina o resultado — só depois que uma observação independente existe.',
+    'const.eyebrow':'CENÁRIOS REPRESENTATIVOS','const.title':'Onde a verificação independente muda o resultado',
+    'const.center':'SPIRAL','const.tag':'CENÁRIO FICTÍCIO — PARA ILUSTRAÇÃO','const.select':'Selecione um setor.',
+    'const.sector.payments':'PAGAMENTOS','const.sector.finance':'FINANÇAS','const.sector.erp':'ERP','const.sector.logistics':'LOGÍSTICA','const.sector.infra':'INFRA','const.sector.identity':'IDENTIDADE',
+    'const.scenario.payments.h':'Northstar Payments — cenário fictício','const.scenario.payments.p':'Um workflow autônomo de reembolso autoriza $128. A Spiral confirma que o processador realmente aplicou isso antes do ticket fechar.',
+    'const.scenario.finance.h':'Ledgerfield Capital — cenário fictício','const.scenario.finance.p':'Um agente de reconciliação propõe lançamentos contábeis. A Spiral confirma que cada lançamento postado bate com o autorizado.',
+    'const.scenario.erp.h':'Meridian Industrial — cenário fictício','const.scenario.erp.p':'Um agente de compras cria um pedido. A Spiral verifica que ele realmente existe no ERP, não só na transcrição do agente.',
+    'const.scenario.logistics.h':'Porto Alameda Logistics — cenário fictício','const.scenario.logistics.p':'Um agente afirma ter redirecionado uma entrega. A Spiral lê o sistema da transportadora diretamente.',
+    'const.scenario.infra.h':'Vantage Cloud Ops — cenário fictício','const.scenario.infra.p':'Um agente afirma que uma mudança de configuração foi implantada. A Spiral confirma a configuração em execução, não o log de deploy.',
+    'const.scenario.identity.h':'Fieldstone Identity — cenário fictício','const.scenario.identity.p':'Um agente afirma ter revogado um acesso. A Spiral verifica que a permissão realmente deixou de existir.',
+    'pilot.eyebrow':'PILOTO DE 14 DIAS','pilot.title':'Uma ação. Um sistema. Quatorze dias.',
+    'pilot.p1.d':'DIA 1–3','pilot.p1.h':'Conectar o workflow','pilot.p2.d':'DIA 4–7','pilot.p2.h':'Definir a policy de autorização',
+    'pilot.p3.d':'DIA 8–11','pilot.p3.h':'Observar execução real','pilot.p4.d':'DIA 12–14','pilot.p4.h':'Revisar receipts e divergências',
+    'final.line':'Seu agente pode dizer SUCCESS.<br><em>A Spiral confere o mundo.</em>','final.cta':'Verificar uma ação crítica',
+    'footer.tag':'Autorização e verificação independentes para ações de IA com consequência real.','footer.contact':'reimsfreitas@gmail.com'
+  }
+};
+
+let currentLang = 'en';
+function applyLang(lang){
+  const dict = I18N[lang];
+  document.documentElement.lang = lang==='pt' ? 'pt-BR' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+    const key = el.getAttribute('data-i18n-html');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('.const-node').forEach(function(n){ n.textContent = dict['const.sector.'+n.dataset.key]; });
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  document.getElementById('lang-pt').classList.toggle('active', lang==='pt');
+  currentLang = lang;
+  // Stateful UI that direct JS writes past the generic sweep above — this is
+  // what re-syncs correctly instead of going stale on a language switch.
+  renderProofStep(currentProofStep);
+  renderProofStatus();
+  renderSoundLabel();
+  renderConstPanel();
+}
+function setLang(lang){ applyLang(lang); }
+document.addEventListener('DOMContentLoaded', function(){ applyLang('en'); });
+</script>
+</body>
+</html>

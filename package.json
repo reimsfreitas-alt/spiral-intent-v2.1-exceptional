@@ -1,0 +1,9 @@
+{
+  "name": "spiral-intent-v21",
+  "version": "2.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "demo": "node demo.js"
+  }
+}
