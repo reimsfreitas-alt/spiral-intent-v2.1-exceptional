@@ -1,55 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Spiral Seal — entrega controlada de arquivos com registro verificável de acesso.">
-<title>Spiral Seal | Entrega Controlada</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiral Seal | Prova de Entrega Digital</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="grid-bg" aria-hidden="true"></div>
-<main class="seal-shell">
-  <header class="sys-header">
-    <div class="brand">SPIRAL_SEAL</div>
-    <div id="status" class="status">SEAL_READY</div>
-  </header>
+    <nav class="navbar">
+        <div class="brand">SPIRAL_SEAL</div>
+        <div class="status-badge">MVP / LIVE DEMO</div>
+    </nav>
 
-  <section class="package">
-    <div class="eyebrow">ENTREGA CONTROLADA • DEMONSTRAÇÃO</div>
-    <h1>Projeto_Executivo_Final.zip</h1>
-    <div class="meta">
-      <div><span>EMISSOR</span><strong>Engenharia Integrada S/A</strong></div>
-      <div><span>TAMANHO</span><strong>142.8 MB</strong></div>
-      <div class="hash"><span>SHA-256</span><strong>8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4</strong></div>
-    </div>
-  </section>
+    <header class="hero">
+        <div class="container text-center">
+            <h1>Você entregou o arquivo.<br>Ele diz que não recebeu.<br><span class="highlight-gold">Quem prova?</span></h1>
+            <p class="subtitle">O Spiral Seal transforma a entrega de um arquivo digital em um evento verificável, registrando quando o destinatário acessou o material e gerando uma evidência verificável da entrega.</p>
+            <div class="hero-actions">
+                <a href="#demo-section" class="btn btn-primary">CRIAR UMA ENTREGA</a>
+                <a href="#demo-section" class="btn btn-secondary">VER DEMONSTRAÇÃO</a>
+            </div>
+        </div>
+    </header>
 
-  <section class="action-card" id="actionCard">
-    <div class="warning"><span class="dot"></span><span>Este selo é de uso único nesta demonstração.</span></div>
-    <p>Ao romper o selo, o arquivo de demonstração será liberado e a página exibirá o registro do evento. <b>Não é uma prova jurídica nem um recibo de produção.</b></p>
-    <button id="breakSealBtn" class="primary-btn">
-      <span>QUEBRAR SELO E BAIXAR</span><span class="arrow">↗</span>
-    </button>
-  </section>
+    <section class="comparison container">
+        <div class="grid-2">
+            <div class="compare-card ordinary">
+                <div class="card-header">ENTREGA NORMAL</div>
+                <div class="flow">
+                    <div class="node">Nuvem Genérica</div>
+                    <div class="arrow">↓</div>
+                    <div class="node">Link de Download</div>
+                    <div class="arrow">↓</div>
+                    <div class="node">Cliente</div>
+                    <div class="arrow">↓</div>
+                    <div class="node unknown">??? (Sem Prova)</div>
+                </div>
+            </div>
+            <div class="compare-card spiral">
+                <div class="card-header gold-text">SPIRAL SEAL</div>
+                <div class="flow">
+                    <div class="node border-gold">Arquivo</div>
+                    <div class="arrow">↓</div>
+                    <div class="node border-gold">Link Selado Único</div>
+                    <div class="arrow">↓</div>
+                    <div class="node border-gold">Cliente Acessa</div>
+                    <div class="arrow">↓</div>
+                    <div class="node solid-gold">PROVA DE ENTREGA GERADA</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <section id="receipt" class="receipt hidden" aria-live="polite">
-    <div class="receipt-head">
-      <div class="eyebrow">EVENTO REGISTRADO</div>
-      <div class="receipt-status">RECEIPT • DEMO</div>
-    </div>
-    <div class="receipt-grid">
-      <div><span>SEAL_ID</span><strong>SEAL-908A-F822</strong></div>
-      <div><span>EVENT</span><strong>PACKAGE_DOWNLOADED</strong></div>
-      <div><span>TIME</span><strong id="receiptTime">—</strong></div>
-      <div><span>FILE_HASH</span><strong>8f4343…27aa4</strong></div>
-    </div>
-    <div class="note">Demonstração local: o registro acima é gerado no navegador. Uma implementação de produção exigiria backend, armazenamento e mecanismo criptográfico real.</div>
-    <button id="resetBtn" class="secondary-btn">GERAR NOVA DEMONSTRAÇÃO</button>
-  </section>
+    <section id="demo-section" class="demo-section">
+        <div class="container">
+            <div class="section-title text-center">
+                <h2>O INSTRUMENTO</h2>
+                <p>Simulação Interativa — Experimente a visão do destinatário.</p>
+            </div>
+            <div class="instrument-box">
+                <div class="disclaimer">SIMULAÇÃO DO FLUXO — BACKEND DE PRODUÇÃO AINDA NÃO CONECTADO</div>
+                <div id="state-1" class="demo-state active">
+                    <div class="package-meta">
+                        <h3>Projeto_Executivo_Final.zip</h3>
+                        <p class="mono-text">TAMANHO: 142.8 MB</p>
+                        <p class="mono-text">SHA-256: 8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4</p>
+                        <p class="mono-text">DESTINATÁRIO: cliente@construtora.com</p>
+                    </div>
+                    <button id="btn-open-seal" class="btn btn-primary w-100">ABRIR ENTREGA</button>
+                </div>
+                <div id="state-2" class="demo-state">
+                    <div class="terminal-loader">
+                        <div id="loading-text" class="mono-text gold-text">&gt; INICIANDO PROTOCOLO...</div>
+                    </div>
+                </div>
+                <div id="state-3" class="demo-state">
+                    <div class="success-banner">DOWNLOAD INICIADO E REGISTRADO</div>
+                    <div class="proof-document">
+                        <div class="doc-header">
+                            <span class="doc-brand">SPIRAL SEAL</span>
+                            <span class="doc-title">PROOF OF DELIVERY</span>
+                        </div>
+                        <div class="doc-body mono-text">
+                            <div class="doc-row"><span class="doc-label">STATUS:</span> <span class="gold-text">VERIFIED &amp; DELIVERED</span></div>
+                            <div class="doc-row"><span class="doc-label">TIMESTAMP:</span> <span id="demo-timestamp">29 AUG 2026 06:42:18</span></div>
+                            <div class="doc-row"><span class="doc-label">EVENT ID:</span> SEAL-908A-F822</div>
+                            <div class="doc-divider"></div>
+                            <div class="doc-row"><span class="doc-label">ASSET:</span> Projeto_Executivo_Final.zip</div>
+                            <div class="doc-row"><span class="doc-label">SHA-256:</span> 8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4</div>
+                            <div class="doc-row"><span class="doc-label">RECIPIENT:</span> cliente@construtora.com</div>
+                            <div class="doc-row"><span class="doc-label">EVENT:</span> PACKAGE_DOWNLOADED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <footer>Spiral Codes © 2026 • Spiral Seal • MVP demonstrativo</footer>
-</main>
-<script src="app.js"></script>
+    <section class="value-prop container">
+        <h2 class="text-center mb-2">Por que isso existe?</h2>
+        <p class="text-center text-muted mb-4">O problema não é enviar o arquivo. É provar que ele foi entregue.</p>
+        <div class="grid-3">
+            <div class="value-card"><h3>ENGENHARIA</h3><p>"Você enviou o projeto executivo final da obra. O cliente atrasa e diz que não recebeu a revisão."</p></div>
+            <div class="value-card"><h3>SOFTWARE</h3><p>"Você entregou o código fonte ou binário da versão final. O cliente segura o pagamento alegando falta de entrega."</p></div>
+            <div class="value-card"><h3>DESIGN / AGÊNCIA</h3><p>"Você liberou os originais após a aprovação por e-mail. A agência diz que o link expirou sem ninguém baixar."</p></div>
+        </div>
+    </section>
+
+    <section class="target-audience container">
+        <h2 class="text-center mb-4">Quem precisa do Spiral Seal</h2>
+        <div class="grid-4">
+            <div class="target-card"><h4>ENGENHEIROS</h4><p>Prove que o projeto final foi disponibilizado e baixado.</p></div>
+            <div class="target-card"><h4>DESENVOLVEDORES</h4><p>Prove que a versão contratada foi entregue e acessada.</p></div>
+            <div class="target-card"><h4>AGÊNCIAS</h4><p>Prove que o material final aprovado foi liberado ao cliente.</p></div>
+            <div class="target-card"><h4>CONSULTORES</h4><p>Prove a data exata em que o cliente recebeu o relatório final.</p></div>
+        </div>
+    </section>
+
+    <section class="how-it-works container">
+        <h2 class="text-center mb-4">Como Funciona</h2>
+        <div class="steps-flex">
+            <div class="step"><span>1</span><br>ENVIE<br><small>Suba o arquivo</small></div>
+            <div class="step-arrow">→</div>
+            <div class="step"><span>2</span><br>SELE<br><small>Geramos o link</small></div>
+            <div class="step-arrow">→</div>
+            <div class="step"><span>3</span><br>COMPARTILHE<br><small>Envie ao cliente</small></div>
+            <div class="step-arrow">→</div>
+            <div class="step"><span>4</span><br>ACESSE<br><small>O cliente abre</small></div>
+            <div class="step-arrow">→</div>
+            <div class="step"><span>5</span><br>PROVE<br><small>Você recebe o laudo</small></div>
+        </div>
+    </section>
+
+    <section class="pricing container">
+        <h2 class="text-center mb-4">Condições Comerciais</h2>
+        <p class="text-center text-muted mb-4">MVP / Pricing Experimental</p>
+        <div class="grid-2">
+            <div class="price-card">
+                <h3>ENTREGA AVULSA</h3><div class="price">R$ 50<span>/entrega</span></div>
+                <ul class="price-features"><li>1 Arquivo</li><li>1 Destinatário</li><li>1 Selo Único</li><li>1 Prova de Acesso PDF</li></ul>
+                <a class="btn btn-secondary w-100 mt-2" href="mailto:reimsfreitas@gmail.com?subject=Spiral%20Seal%20-%20Entrega%20Avulsa%20R%2450">SOLICITAR SELO</a>
+            </div>
+            <div class="price-card pro">
+                <h3>SPIRAL PRO</h3><div class="price">R$ 500<span>/mês</span></div>
+                <ul class="price-features"><li>Entregas ilimitadas</li><li>Destinatários ilimitados</li><li>Histórico de Custódia</li><li>API de Integração</li></ul>
+                <a class="btn btn-primary w-100 mt-2" href="mailto:reimsfreitas@gmail.com?subject=Spiral%20Seal%20Pro%20-%20R%24500%20mensal">FALAR SOBRE O PRO</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="transparency container">
+        <h2 class="text-center mb-4">Estado Tecnológico (MVP Matrix)</h2>
+        <div class="matrix-table-wrapper">
+            <table class="matrix-table"><tr><th>Componente</th><th>Status Atual</th></tr>
+            <tr><td>Interface de Entrega</td><td><span class="badge live">LIVE</span></td></tr>
+            <tr><td>Fluxo de Demonstração (UI/UX)</td><td><span class="badge live">LIVE</span></td></tr>
+            <tr><td>Geração de Hash SHA-256</td><td><span class="badge demo">DEMO (Simulado)</span></td></tr>
+            <tr><td>Registro Real de Acesso (DB)</td><td><span class="badge demo">DEMO (Simulado)</span></td></tr>
+            <tr><td>Link de Uso Único (Burn after read)</td><td><span class="badge planned">PLANEJADO</span></td></tr>
+            <tr><td>Recibo Assinado Criptograficamente</td><td><span class="badge planned">PLANEJADO</span></td></tr></table>
+        </div>
+    </section>
+
+    <footer><div class="container text-center text-muted mono-text"><p>SPIRAL SEAL © 2026. A SPIRAL INTENT PRODUCT.</p></div></footer>
+    <script src="app.js"></script>
 </body>
 </html>
