@@ -1,1 +1,46 @@
-document.addEventListener('DOMContentLoaded',()=>{const btn=document.getElementById('breakSealBtn'),status=document.getElementById('status'),card=document.getElementById('actionCard'),receipt=document.getElementById('receipt'),time=document.getElementById('receiptTime'),reset=document.getElementById('resetBtn');if(!btn||!status||!card||!receipt)return;const stamp=()=>new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'medium'});btn.addEventListener('click',()=>{btn.disabled=true;btn.querySelector('span').textContent='PROCESSANDO...';setTimeout(()=>{status.textContent='SEAL_OPENED';status.style.color='var(--red)';card.style.display='none';time.textContent=stamp();receipt.classList.remove('hidden');const demo='SPIRAL-SEAL-DEMO\nArquivo: Projeto_Executivo_Final.zip\nEvento: PACKAGE_DOWNLOADED\nRegistro: navegador local';const blob=new Blob([demo],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='spiral-seal-demo-receipt.txt';a.textContent='';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)},900)});reset.addEventListener('click',()=>location.reload())});
+document.addEventListener('DOMContentLoaded', () => {
+    const btnOpenSeal = document.getElementById('btn-open-seal');
+    const state1 = document.getElementById('state-1');
+    const state2 = document.getElementById('state-2');
+    const state3 = document.getElementById('state-3');
+    const loadingText = document.getElementById('loading-text');
+    const demoTimestamp = document.getElementById('demo-timestamp');
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const getFormattedDate = () => {
+        const now = new Date();
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        const time = now.toTimeString().split(' ')[0];
+        return `${day} ${month} ${year} ${time}`;
+    };
+
+    if (!btnOpenSeal || !state1 || !state2 || !state3 || !loadingText || !demoTimestamp) return;
+
+    btnOpenSeal.addEventListener('click', async () => {
+        state1.classList.remove('active');
+        state2.classList.add('active');
+
+        const steps = [
+            "> VALIDANDO SELO E CONTRATO...",
+            "> VERIFICANDO IDENTIDADE DO DESTINATÁRIO...",
+            "> LIBERANDO ACESSO AO ARQUIVO...",
+            "> SIMULANDO REGISTRO DO EVENTO..."
+        ];
+
+        for (const text of steps) {
+            loadingText.innerText = text;
+            await sleep(1200);
+        }
+
+        demoTimestamp.innerText = getFormattedDate();
+        state2.classList.remove('active');
+        state3.classList.add('active');
+
+        // A demonstração não acessa um backend nem baixa um arquivo privado real.
+        console.log("Spiral Seal demo complete: production backend not connected.");
+    });
+});
