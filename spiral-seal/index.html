@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Spiral Seal — entrega controlada de arquivos com registro verificável de acesso.">
+<title>Spiral Seal | Entrega Controlada</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+<main class="seal-shell">
+  <header class="sys-header">
+    <div class="brand">SPIRAL_SEAL</div>
+    <div id="status" class="status">SEAL_READY</div>
+  </header>
+
+  <section class="package">
+    <div class="eyebrow">ENTREGA CONTROLADA • DEMONSTRAÇÃO</div>
+    <h1>Projeto_Executivo_Final.zip</h1>
+    <div class="meta">
+      <div><span>EMISSOR</span><strong>Engenharia Integrada S/A</strong></div>
+      <div><span>TAMANHO</span><strong>142.8 MB</strong></div>
+      <div class="hash"><span>SHA-256</span><strong>8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4</strong></div>
+    </div>
+  </section>
+
+  <section class="action-card" id="actionCard">
+    <div class="warning"><span class="dot"></span><span>Este selo é de uso único nesta demonstração.</span></div>
+    <p>Ao romper o selo, o arquivo de demonstração será liberado e a página exibirá o registro do evento. <b>Não é uma prova jurídica nem um recibo de produção.</b></p>
+    <button id="breakSealBtn" class="primary-btn">
+      <span>QUEBRAR SELO E BAIXAR</span><span class="arrow">↗</span>
+    </button>
+  </section>
+
+  <section id="receipt" class="receipt hidden" aria-live="polite">
+    <div class="receipt-head">
+      <div class="eyebrow">EVENTO REGISTRADO</div>
+      <div class="receipt-status">RECEIPT • DEMO</div>
+    </div>
+    <div class="receipt-grid">
+      <div><span>SEAL_ID</span><strong>SEAL-908A-F822</strong></div>
+      <div><span>EVENT</span><strong>PACKAGE_DOWNLOADED</strong></div>
+      <div><span>TIME</span><strong id="receiptTime">—</strong></div>
+      <div><span>FILE_HASH</span><strong>8f4343…27aa4</strong></div>
+    </div>
+    <div class="note">Demonstração local: o registro acima é gerado no navegador. Uma implementação de produção exigiria backend, armazenamento e mecanismo criptográfico real.</div>
+    <button id="resetBtn" class="secondary-btn">GERAR NOVA DEMONSTRAÇÃO</button>
+  </section>
+
+  <footer>Spiral Codes © 2026 • Spiral Seal • MVP demonstrativo</footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
