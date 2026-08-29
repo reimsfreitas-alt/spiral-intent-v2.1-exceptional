@@ -1,23 +1,31 @@
-# Spiral Seal — MVP
+# Spiral Seal
 
-Primeira implementação visual do conceito de entrega controlada de arquivos.
+**O Envelope Digital que Prova a Entrega.**
+O Spiral Seal transforma a entrega de um arquivo em um evento verificável. Ele registra a experiência de acesso e prepara a emissão de uma evidência de entrega (Proof of Delivery).
 
-## Estado atual
+## O que é este repositório
 
-Este MVP é uma demonstração estática/interativa. O fluxo do botão simula a abertura do selo e gera um pequeno arquivo local de demonstração para tornar a interação real no navegador.
+Esta é a **Landing Page MVP** e o protótipo comercial da ferramenta. O objetivo desta versão é vender a primeira unidade e validar a compreensão do mercado antes de conectar infraestruturas complexas.
 
-Não há, nesta versão:
+## Como rodar localmente
 
-- armazenamento real de arquivos;
-- link de uso único persistido no servidor;
-- recibo criptográfico de produção;
-- blockchain;
-- validação jurídica do evento.
+Não requer build, dependências ou servidores.
 
-Esses componentes exigem backend, persistência e infraestrutura de segurança próprios.
+1. Baixe os arquivos.
+2. Abra `index.html` diretamente em um navegador.
 
-## Deploy
+## Estado da Tecnologia (Transparência do MVP)
 
-O projeto foi isolado na branch `spiral-seal-v1-emergency` do repositório `reimsfreitas-alt/spiral-intent-v2.1-exceptional` para não alterar a produção do Spiral Intent.
+Esta versão é uma vitrine comercial com uma demonstração interativa. A diferença entre interface real e simulação é deliberadamente explícita.
 
-A página está em `spiral-seal/index.html` e pode ser servida como site estático.
+* **REAL (frontend):** interface, proposta de valor, fluxo UX, estrutura visual do Proof of Delivery e CTAs comerciais.
+* **DEMO (simulado no navegador):** hash exibido, registro do evento, timestamp e sequência de abertura do selo.
+* **NÃO IMPLEMENTADO:** armazenamento de arquivo no servidor, link único persistido, registro de acesso em banco, recibo criptograficamente assinado e mecanismo de burn-after-read.
+
+Uma implementação de produção exigirá backend, persistência, controle de acesso, armazenamento e mecanismo criptográfico apropriados.
+
+## Deployment
+
+O MVP está isolado na branch `spiral-seal-v1-emergency` do repositório `reimsfreitas-alt/spiral-intent-v2.1-exceptional`, preservando a produção do Spiral Intent.
+
+A página fica em `spiral-seal/index.html` e é compatível com hospedagem estática na Vercel.
