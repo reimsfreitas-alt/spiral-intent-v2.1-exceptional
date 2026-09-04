@@ -4,14 +4,12 @@
     { "source": "/media/(.*)", "headers": [{ "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }] }
   ],
   "rewrites": [
-    { "source": "/site/video/part0.js", "destination": "/site/video-loader.js" },
     { "source": "/architecture", "destination": "/site/architecture.html" },
     { "source": "/security", "destination": "/site/security.html" },
     { "source": "/threat-model", "destination": "/site/threat-model.html" },
     { "source": "/demo", "destination": "/site/demo.html" },
     { "source": "/verify", "destination": "/site/verify.html" },
     { "source": "/docs", "destination": "/site/docs.html" },
-    { "source": "/receipts", "destination": "/site/receipts.html" },
-    { "source": "/video", "destination": "/site/video2.html" }
+    { "source": "/receipts", "destination": "/site/receipts.html" }
   ]
 }
