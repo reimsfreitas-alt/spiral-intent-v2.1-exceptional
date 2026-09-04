@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Spiral Intent — Architecture</title><style>body{margin:0;background:#05070a;color:#e7edf3;font:16px/1.6 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:70px 24px}a{color:#c9a227}.mono{font-family:monospace;color:#c9a227}pre{padding:20px;background:#0a0f16;border:1px solid #1c2633;border-radius:10px;overflow:auto}li{margin:12px 0;color:#aab4c2}</style></head><body><main><div class="mono">SPIRAL INTENT / ARCHITECTURE</div><h1>Worker ≠ Observer ≠ Verifier.</h1><p>Spiral Intent places an independent verification boundary between authorized intent and consequential external effects.</p><pre>INTENT → CORE → POLICY → WORKER → EXTERNAL STATE
+                         ↓
+                    OBSERVER (read-only)
+                         ↓
+                      VERIFIER
+                         ↓
+                 SIGNED RECEIPT → LEDGER</pre><ul><li><b>Policy</b> signs a bounded authorization envelope or refuses.</li><li><b>Worker</b> executes with write credentials only.</li><li><b>Observer</b> reads external state through a separate read-only identity.</li><li><b>Verifier</b> compares authorized effect with observed effect deterministically.</li><li><b>Ledger</b> records signed receipts in an append-only hash chain.</li></ul><p><a href="/">← Back to Spiral Intent</a></p></main></body></html>
