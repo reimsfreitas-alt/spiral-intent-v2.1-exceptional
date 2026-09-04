@@ -11,6 +11,6 @@
     { "source": "/verify", "destination": "/site/verify.html" },
     { "source": "/docs", "destination": "/site/docs.html" },
     { "source": "/receipts", "destination": "/site/receipts.html" },
-    { "source": "/video", "destination": "/site/video.html" }
+    { "source": "/video", "destination": "/site/video2.html" }
   ]
 }
