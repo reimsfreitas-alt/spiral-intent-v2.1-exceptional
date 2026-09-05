@@ -1,0 +1,38 @@
+name: Polish Spiral Intent footer
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  polish-footer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refine footer signature
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          old_css = '.foot{padding:30px 0;color:var(--text-dim);font:11px monospace}'
+          new_css = '.foot{padding:30px 0 34px;color:var(--text-dim);font:11px monospace;border-top:1px solid #111923}.foot-signature{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}.foot-brand{color:var(--text);letter-spacing:.08em}.foot-brand b{color:var(--signal);font-weight:600}.foot-note{color:var(--text-dim);opacity:.85}'
+          if old_css in s and '.foot-signature' not in s:
+              s = s.replace(old_css, new_css, 1)
+          old = '<footer class="foot"><div class="wrap">SPIRAL CODES · SPIRAL INTENT · <a href="/security" data-i18n="security">SECURITY</a> · <a href="/verify" data-i18n="verify">VERIFY</a> · <a href="/docs" data-i18n="docs">DOCS</a> · <a href="mailto:reimsfreitas@gmail.com" data-i18n="contact">CONTACT</a></div></footer>'
+          new = '<footer class="foot"><div class="wrap"><div class="foot-signature"><div class="foot-brand"><b>POWERED BY SPIRAL CODES</b> · SPIRAL INTENT · <a href="/security" data-i18n="security">SECURITY</a> · <a href="/verify" data-i18n="verify">VERIFY</a> · <a href="/docs" data-i18n="docs">DOCS</a> · <a href="mailto:reimsfreitas@gmail.com" data-i18n="contact">CONTACT</a></div><div class="foot-note">Top-tier by our own standards. We checked twice.</div></div></div></footer>'
+          if old in s and 'POWERED BY SPIRAL CODES' not in s:
+              s = s.replace(old, new, 1)
+              p.write_text(s)
+          elif 'POWERED BY SPIRAL CODES' in s:
+              print('Footer signature already present; nothing to do.')
+          else:
+              raise SystemExit('Expected footer markup not found')
+          PY
+      - name: Commit footer polish
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'feat: polish Spiral Codes footer signature [skip ci]'
+          git push
