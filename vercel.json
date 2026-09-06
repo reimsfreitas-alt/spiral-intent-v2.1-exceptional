@@ -3,8 +3,10 @@
   "headers": [
     { "source": "/media/(.*)", "headers": [{ "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }] }
   ],
+  "redirects": [
+    { "source": "/", "destination": "https://spiral-intent-independent-execution-assurance-29h9zo.v2.appdeploy.ai/", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/", "destination": "https://spiral-intent-independent-execution-assurance-29h9zo.v2.appdeploy.ai/" },
     { "source": "/portfolio", "destination": "https://spiral-orb-canonical-6qx6cw.v2.appdeploy.ai/" },
     { "source": "/portfolio/(.*)", "destination": "https://spiral-orb-canonical-6qx6cw.v2.appdeploy.ai/$1" },
     { "source": "/architecture", "destination": "/site/architecture.html" },
