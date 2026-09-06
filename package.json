@@ -1,9 +1,8 @@
 {
-  "name": "spiral-intent-v21",
-  "version": "2.1.0",
-  "type": "module",
-  "scripts": {
-    "test": "node --test test/*.test.js",
-    "demo": "node demo.js"
-  }
+  "name": "spiral-intent-ievp",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {"dev":"next dev","build":"next build","start":"next start","test":"jest --runInBand"},
+  "dependencies": {"next":"14.2.3","react":"^18.3.1","react-dom":"^18.3.1","stripe":"^15.12.0","canonicalize":"^2.0.0"},
+  "devDependencies": {"@types/node":"^20","@types/react":"^18","@types/react-dom":"^18","typescript":"^5","jest":"^29.7.0","ts-jest":"^29.2.5"}
 }
