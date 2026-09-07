@@ -9,5 +9,5 @@ export function generateECR(intentId:string,a:AuthorizedEffect,execution:Executi
  const canonicalPayload={...payload,public_key_hex:publicKeyHex,hashes:{...payload.hashes,canonical_sha256:''}};
  payload.hashes.canonical_sha256=sha256(jcs(canonicalPayload));
  const signedPayload={...payload,public_key_hex:publicKeyHex};
- return {...payload,signature:signEd25519(Buffer.from(jcs(signedPayload)),privateKeyHex),public_key_hex:publicKeyHex};
+ return {...payload,signature:signEd25519(jcs(signedPayload),privateKeyHex),public_key_hex:publicKeyHex};
 }
