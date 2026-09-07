@@ -1,2 +1,2 @@
-import {NextResponse} from 'next/server';
-export async function GET(){return NextResponse.json({service:'spiral-intent',protocol:'ievp/v1',stripeConfigured:!!process.env.STRIPE_SECRET_KEY&&!!process.env.STRIPE_READ_ONLY_KEY,cryptoConfigured:!!process.env.ED25519_PRIVATE_KEY_HEX&&!!process.env.ED25519_PUBLIC_KEY_HEX});}
+import {NextResponse} from 'next/server';import {pool,getActiveKey} from '@/core/ledger';
+export async function GET(){let dbConnected=false;try{await pool.query('SELECT 1');dbConnected=true}catch{}return NextResponse.json({service:'spiral-intent',protocol:'ievp/v2',dbConnected,policyKeyConfigured:!!process.env.POLICY_PRIVATE_KEY_HEX,receiptKeyConfigured:!!process.env.RECEIPT_PRIVATE_KEY_HEX,apiTokenConfigured:!!process.env.SPIRAL_API_TOKEN,externalAdapter:process.env.EXTERNAL_ADAPTER==='stripe'?'stripe':'mock-bank',productionMockBlocked:process.env.NODE_ENV==='production'&&process.env.ALLOW_MOCK_BANK!=='true'});}

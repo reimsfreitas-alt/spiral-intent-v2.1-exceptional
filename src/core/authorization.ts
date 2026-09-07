@@ -1,10 +1,8 @@
 import crypto from 'node:crypto';
 import {AuthorizationGrant,Intent} from './types';
 import {jcs,signEd25519,verifyEd25519} from './crypto';
-export function createGrant(intent:Intent,privateKeyHex:string,keyId='ed25519-primary'):AuthorizationGrant{
- const body={grant_id:`grant_${crypto.randomUUID()}`,intent,issued_at:new Date().toISOString(),expires_at:new Date(Date.now()+5*60_000).toISOString(),issuer_key_id:keyId};
- return {...body,signature:signEd25519(jcs(body),privateKeyHex)};
-}
-export function verifyGrant(g:AuthorizationGrant,publicKeyHex:string):boolean{
- const {signature,...body}=g; return verifyEd25519(jcs(body),signature,publicKeyHex)&&new Date(g.expires_at).getTime()>Date.now();
-}
+import {pool} from './ledger';
+export function createGrant(intent:Intent,privateKeyHex:string,keyId='ed25519-primary',policyId='policy-default',policyVersion='v1'):AuthorizationGrant{const body={authorization_id:`auth_${crypto.randomUUID()}`,intent,policy_id:policyId,policy_version:policyVersion,nonce:crypto.randomBytes(16).toString('hex'),issued_at:new Date().toISOString(),expires_at:new Date(Date.now()+5*60_000).toISOString(),issuer_key_id:keyId};return {...body,signature:signEd25519(jcs(body),privateKeyHex)};}
+export function verifyGrantSignature(g:AuthorizationGrant,publicKeyHex:string):boolean{const {signature,...body}=g;return verifyEd25519(jcs(body),signature,publicKeyHex)&&new Date(g.expires_at).getTime()>Date.now();}
+export function verifyTargetBinding(g:AuthorizationGrant,requestedTarget:string):boolean{return g.intent.authorized_effect.target===requestedTarget;}
+export async function persistAndConsume(g:AuthorizationGrant):Promise<{ok:boolean;reason?:string}>{const client=await pool.connect();try{await client.query('BEGIN');const intentIns=await client.query(`INSERT INTO intents (intent_id,system,operation,target,amount,currency,idempotency_key) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (idempotency_key) DO NOTHING RETURNING intent_id`,[g.intent.intent_id,g.intent.authorized_effect.system,g.intent.authorized_effect.operation,g.intent.authorized_effect.target,g.intent.authorized_effect.amount,g.intent.authorized_effect.currency,g.intent.intent_id]);if(intentIns.rowCount===0){await client.query('ROLLBACK');return{ok:false,reason:'INTENT_ALREADY_EXISTS_IDEMPOTENT'};}await client.query(`INSERT INTO authorizations (authorization_id,intent_id,policy_id,policy_version,target,amount,nonce,issued_at,expires_at,issuer_key_id,signature) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,[g.authorization_id,g.intent.intent_id,g.policy_id,g.policy_version,g.intent.authorized_effect.target,g.intent.authorized_effect.amount,g.nonce,g.issued_at,g.expires_at,g.issuer_key_id,g.signature]);await client.query('COMMIT');return{ok:true};}catch(e:any){try{await client.query('ROLLBACK')}catch{} if(e?.code==='23505')return{ok:false,reason:'NONCE_OR_AUTHORIZATION_REPLAYED'};throw e;}finally{client.release();}}

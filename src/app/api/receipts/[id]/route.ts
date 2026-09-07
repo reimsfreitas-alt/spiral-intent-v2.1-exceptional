@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {isAuthorized} from '@/core/auth';import {pool} from '@/core/ledger';
+export async function GET(req:Request,{params}:{params:{id:string}}){if(!isAuthorized(req))return NextResponse.json({error:'UNAUTHORIZED'},{status:401});const{rows}=await pool.query('SELECT payload FROM receipts WHERE receipt_id=$1 OR execution_id=$1',[params.id]);if(!rows[0])return NextResponse.json({error:'NOT_FOUND'},{status:404});return NextResponse.json(rows[0].payload);}

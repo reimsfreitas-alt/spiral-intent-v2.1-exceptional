@@ -1,8 +1,2 @@
-import {AuthorizedEffect,ObservedEffect,VerificationResult} from './types';
-export function verifyEffect(a:AuthorizedEffect,o:ObservedEffect):VerificationResult{
- const system=a.system===o.system, operation=a.operation===o.operation, amount=a.amount===o.amount, currency=a.currency.toLowerCase()===o.currency.toLowerCase(), status=['succeeded','pending'].includes(o.status);
- if(!system||!operation) return {verdict:'INCONCLUSIVE',reason:'SCOPE_MISMATCH',invariants:{system,operation,amount,currency,status}};
- if(!status) return {verdict:'INCONCLUSIVE',reason:`EXTERNAL_STATUS_${o.status.toUpperCase()}`,invariants:{system,operation,amount,currency,status}};
- if(amount&&currency) return {verdict:'CONFIRMED',reason:'EXACT_EFFECT_MATCH',invariants:{system,operation,amount,currency,status}};
- return {verdict:'DEVIATED',reason:'AUTHORIZED_EFFECT_DOES_NOT_MATCH_OBSERVED_EFFECT',invariants:{system,operation,amount,currency,status}};
-}
+import {AuthorizedEffect,Execution,ObservedEffect,VerificationResult} from './types';
+export function verifyEffect(a:AuthorizedEffect,e:Execution,o:ObservedEffect):VerificationResult{const i={system:a.system===o.system,operation:a.operation===o.operation,target:a.target===o.target,amount:a.amount===o.amount,currency:a.currency===o.currency,status:o.status==='succeeded'||o.status==='succeeded',claim_matches_observed:e.executed_amount===o.amount,authorized_matches_observed:a.amount===o.amount&&a.target===o.target&&a.currency===o.currency};if(!i.system||!i.operation||!i.target||!i.currency)return{verdict:'DEVIATED',reason:'AUTHORIZED_EFFECT_DOES_NOT_MATCH_OBSERVED_EFFECT',invariants:i};if(i.amount&&i.claim_matches_observed&&i.status)return{verdict:'CONFIRMED',reason:'EXACT_EFFECT_MATCH',invariants:i};if(!i.amount&&i.claim_matches_observed)return{verdict:'DEVIATED',reason:'AUTHORIZED_EFFECT_DOES_NOT_MATCH_OBSERVED_EFFECT',invariants:i};if(!i.claim_matches_observed)return{verdict:'CONFLICTED',reason:'WORKER_CLAIM_CONFLICTS_WITH_OBSERVED_STATE',invariants:i};return{verdict:'INCONCLUSIVE',reason:'OBSERVATION_NOT_SUFFICIENT_FOR_CONFIRMATION',invariants:i};}

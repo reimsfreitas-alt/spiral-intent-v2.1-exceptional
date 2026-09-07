@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {getActiveKey} from '@/core/ledger';
+export async function GET(req:Request){const role=new URL(req.url).searchParams.get('role')||'receipt_authority';if(role!=='receipt_authority'&&role!=='policy_authority')return NextResponse.json({error:'INVALID_ROLE'},{status:400});const key=await getActiveKey(role);if(!key)return NextResponse.json({error:'KEY_NOT_CONFIGURED'},{status:503});return NextResponse.json({key_id:key.key_id,public_key_hex:key.public_key_hex,algorithm:'Ed25519',role});}
