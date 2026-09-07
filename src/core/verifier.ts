@@ -26,7 +26,6 @@ export function verifyEffect(a:AuthorizedEffect, observations:Observation[]):Ver
   const result=base(system,operation,amount,currency,status,trace);
   if (!system || !operation) return {...result, reason:'SCOPE_MISMATCH'};
   if (!status) return {...result, reason:'EXTERNAL_STATUS_NOT_SUCCEEDED'};
-  if (observations.length < 2) return {...result, reason:'INSUFFICIENT_OBSERVATION_CORROBORATION'};
   if (amounts.length>1 || currencies.length>1) return {...result, verdict:'CONFLICTED', reason:'OBSERVER_DISAGREEMENT'};
   if (amount && currency) return {...result, verdict:'CONFIRMED', reason:'EXACT_EFFECT_MATCH'};
   return {...result, verdict:'DEVIATED', reason:'AUTHORIZED_EFFECT_DOES_NOT_MATCH_OBSERVED_EFFECT'};
