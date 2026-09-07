@@ -1,8 +1,10 @@
 import {verifyEffect} from './verifier';
 const a={system:'stripe' as const,operation:'refund' as const,amount:50000,currency:'brl'};
-const o=(amount:number,status='succeeded')=>({system:'stripe' as const,operation:'refund' as const,external_operation_id:'re_1',amount,currency:'brl',status,observed_at:'2026-09-06T00:00:00.000Z'});
-test('CONFIRMED exact match',()=>expect(verifyEffect(a,o(50000)).verdict).toBe('CONFIRMED'));
-test('DEVIATED amount mismatch',()=>expect(verifyEffect(a,o(5000000)).verdict).toBe('DEVIATED'));
-test('INCONCLUSIVE external failure',()=>expect(verifyEffect(a,o(50000,'failed')).verdict).toBe('INCONCLUSIVE'));
-test('INCONCLUSIVE scope mismatch',()=>expect(verifyEffect(a,{...o(50000),system:'stripe',operation:'charge'} as any).verdict).toBe('INCONCLUSIVE'));
-test('deterministic',()=>expect(verifyEffect(a,o(5000000))).toEqual(verifyEffect(a,o(5000000))));
+const o=(amount:number,status='succeeded',id='obs_1')=>({system:'stripe' as const,operation:'refund' as const,external_operation_id:'re_1',amount,currency:'brl',status,observed_at:'2026-09-06T00:00:00.000Z',observer_id:id,trust_domain:{org:'spiral',cloud:'vercel',credential_class:'stripe_readonly'},freshness_ms:100,independence_vector:['org:spiral','cloud:vercel','credential:stripe_readonly'],source:{kind:'stripe_api',locator:'re_1',observed_at:'2026-09-06T00:00:00.000Z'}});
+const pair=(a1:number,a2=a1,status='succeeded')=>[o(a1,status,'obs_1'),o(a2,status,'obs_2')];
+test('CONFIRMED exact match with one independent observer',()=>expect(verifyEffect(a,[o(50000)]).verdict).toBe('CONFIRMED'));
+test('DEVIATED amount mismatch',()=>expect(verifyEffect(a,[o(5000000)]).verdict).toBe('DEVIATED'));
+test('INCONCLUSIVE external failure',()=>expect(verifyEffect(a,[o(50000,'failed')]).verdict).toBe('INCONCLUSIVE'));
+test('INCONCLUSIVE scope mismatch',()=>expect(verifyEffect(a,[{...o(50000),operation:'charge'}] as any).verdict).toBe('INCONCLUSIVE'));
+test('CONFLICTED observer disagreement',()=>expect(verifyEffect(a,pair(50000,5000000)).verdict).toBe('CONFLICTED'));
+test('deterministic',()=>expect(verifyEffect(a,[o(5000000)])).toEqual(verifyEffect(a,[o(5000000)])));
