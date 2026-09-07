@@ -69,3 +69,5 @@ test in `scripts/e2e.ts` pass), but the authorization does not yet pin a `resour
 narrower than the target string itself in cases where a `target` could be ambiguous
 across systems. Low risk today with a single external system; worth revisiting before a
 second connector is added.
+
+<!-- landing restore trigger: preserve approved five-language flow and media -->
