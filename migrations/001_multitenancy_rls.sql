@@ -2,6 +2,8 @@
 -- Apply after the application tables are created. Every tenant-owned table must
 -- carry tenant_id and deny cross-tenant access at the database boundary.
 
+create extension if not exists pgcrypto;
+
 create table if not exists tenants (
   tenant_id uuid primary key,
   name text not null,
@@ -103,14 +105,14 @@ alter table observations enable row level security;
 alter table ecrs enable row level security;
 alter table audit_events enable row level security;
 
-create policy tenant_keys_isolation on tenant_keys using (tenant_id = current_setting('app.current_tenant', true)::uuid);
-create policy intents_isolation on intents using (tenant_id = current_setting('app.current_tenant', true)::uuid);
-create policy authorizations_isolation on authorizations using (tenant_id = current_setting('app.current_tenant', true)::uuid);
-create policy executions_isolation on executions using (tenant_id = current_setting('app.current_tenant', true)::uuid);
-create policy observations_isolation on observations using (tenant_id = current_setting('app.current_tenant', true)::uuid);
-create policy ecrs_isolation on ecrs using (tenant_id = current_setting('app.current_tenant', true)::uuid);
-create policy audit_events_isolation on audit_events using (tenant_id = current_setting('app.current_tenant', true)::uuid);
+create policy tenant_keys_isolation on tenant_keys using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
+create policy intents_isolation on intents using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
+create policy authorizations_isolation on authorizations using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
+create policy executions_isolation on executions using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
+create policy observations_isolation on observations using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
+create policy ecrs_isolation on ecrs using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
+create policy audit_events_isolation on audit_events using (tenant_id = nullif(current_setting('app.current_tenant', true),'')::uuid);
 
 -- Application users receive DML through policies, never direct tenant_id updates.
--- Production deployment should also REVOKE UPDATE/DELETE on audit_events and
--- expose append-only stored procedures to the application role.
+-- Production should use a dedicated migration/deployment role to create the
+-- policies and revoke UPDATE/DELETE on audit_events from the application role.
