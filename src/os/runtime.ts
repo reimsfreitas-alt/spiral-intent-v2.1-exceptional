@@ -9,13 +9,13 @@ export class SpiralIntentOS {
   constructor(private readonly ledger = new MemoryLedger()) {}
 
   receive(intent: IntentRequest, rules: readonly PolicyRule[], now = new Date()) {
-    this.ledger.append({tenant_id:intent.tenant_id,intent_id:intent.intent_id,state:'RECEIVED',type:'INTENT_RECEIVED',occurred_at:now.toISOString(),data:intent,});
+    this.ledger.append({tenant_id:intent.tenant_id,intent_id:intent.intent_id,state:'RECEIVED',type:'INTENT_RECEIVED',occurred_at:now.toISOString(),data:{...intent}});
     const policy=evaluatePolicy(intent,rules,now);
     assertTransition('RECEIVED','POLICY_EVALUATED');
-    this.ledger.append({tenant_id:intent.tenant_id,intent_id:intent.intent_id,state:'POLICY_EVALUATED',type:'POLICY_EVALUATED',occurred_at:now.toISOString(),data:policy});
+    this.ledger.append({tenant_id:intent.tenant_id,intent_id:intent.intent_id,state:'POLICY_EVALUATED',type:'POLICY_EVALUATED',occurred_at:now.toISOString(),data:{...policy}});
     if (policy.decision !== 'ALLOW') {
       const state: OSState = policy.decision === 'DENY' ? 'REJECTED' : 'REQUIRES_APPROVAL';
-      this.ledger.append({tenant_id:intent.tenant_id,intent_id:intent.intent_id,state,type:'AUTHORIZATION_DECISION',occurred_at:now.toISOString(),data:policy});
+      this.ledger.append({tenant_id:intent.tenant_id,intent_id:intent.intent_id,state,type:'AUTHORIZATION_DECISION',occurred_at:now.toISOString(),data:{...policy}});
       return {intent,policy,state,authorization:null};
     }
     const authorization=issueAuthorization(intent,policy,now);
