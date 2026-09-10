@@ -1,5 +1,6 @@
 import {createHash,randomBytes} from 'node:crypto';
-import {AuthorizationEnvelope,IntentRequest,PolicyResult} from './types';
+import {AuthorizationEnvelope,IntentRequest} from './types';
+import {PolicyResult} from './policy';
 import {canonical,sha256} from './hash';
 
 export function idempotencyKey(intent: IntentRequest): string {
