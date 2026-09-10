@@ -1,0 +1,24 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://spiral.codes/schemas/ecr-v1.json",
+  "title":"Spiral Effect Correspondence Receipt v1",
+  "type":"object",
+  "required":["spec_version","receipt_id","issued_at","intent_id","authorized_effect","execution","observations","verification","issuer","hashes","signature","public_key_hex"],
+  "properties":{
+    "spec_version":{"const":"ievp/v1"},
+    "receipt_id":{"type":"string","minLength":1},
+    "issued_at":{"type":"string","format":"date-time"},
+    "intent_id":{"type":"string","minLength":1},
+    "authorized_effect":{"$ref":"#/$defs/effect"},
+    "execution":{"type":"object","required":["execution_id","intent_id","external_operation_id","requested_amount","executed_amount","created_at"],"properties":{"execution_id":{"type":"string"},"intent_id":{"type":"string"},"external_operation_id":{"type":"string"},"requested_amount":{"type":"integer","minimum":0},"executed_amount":{"type":"integer","minimum":0},"created_at":{"type":"string","format":"date-time"}},"additionalProperties":true},
+    "observations":{"type":"array","items":{"type":"object","required":["system","operation","external_operation_id","amount","currency","status","observed_at","observer_id","trust_domain","source"],"additionalProperties":true}},
+    "verification":{"type":"object","required":["verdict","reason","invariants","trace"],"properties":{"verdict":{"enum":["CONFIRMED","DEVIATED","INCONCLUSIVE","CONFLICTED"]},"reason":{"type":"string"},"invariants":{"type":"object"},"trace":{"type":"array","items":{"type":"string"}}},"additionalProperties":false},
+    "issuer":{"type":"object","required":["id","key_id"],"properties":{"id":{"type":"string"},"key_id":{"type":"string"}},"additionalProperties":false},
+    "hashes":{"type":"object","required":["canonical_sha256","authorized_effect_sha256","observed_effect_sha256"],"properties":{"canonical_sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"authorized_effect_sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"observed_effect_sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}},"additionalProperties":false},
+    "signature":{"type":"string","minLength":1},
+    "public_key_hex":{"type":"string","pattern":"^[a-f0-9]+$"},
+    "ledger_root_hash":{"type":"string"},
+    "ledger_sequence":{"type":"integer","minimum":0}
+  },
+  "$defs":{"effect":{"type":"object","required":["system","operation","amount","currency"],"properties":{"system":{"type":"string"},"operation":{"type":"string"},"amount":{"type":"integer","minimum":0},"currency":{"type":"string","minLength":3},"resource_id":{"type":"string"}},"additionalProperties":false}}
+}
