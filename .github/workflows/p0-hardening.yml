@@ -1,0 +1,33 @@
+name: Spiral Intent P0 Hardening
+
+on:
+  push:
+    branches: [main, 'fix/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --runInBand
+      - run: npm run build
+      - name: Offline verifier smoke
+        run: node -e "const v=require('./offline/verify-ecr'); if(typeof v.verify!=='function') process.exit(1); console.log('offline verifier loaded')"
+      - name: Static P0 guardrails
+        run: |
+          test -f migrations/001_multitenancy_rls.sql
+          test -f migrations/002_append_only_audit.sql
+          test -f migrations/003_tenant_escape_test.sql
+          test -f schemas/ecr-v1.json
+          test -f core/key-lifecycle.ts
+          test -f core/state-machine.ts
