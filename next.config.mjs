@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  async rewrites() {
+  async redirects() {
     return [
       {
         source: '/:path*',
-        destination: 'https://spiral-wealth-mega-landing-luu9xs.v2.appdeploy.ai/:path*'
+        destination: 'https://spiral-wealth-mega-landing-luu9xs.v2.appdeploy.ai/:path*',
+        permanent: false
       }
     ];
   }
