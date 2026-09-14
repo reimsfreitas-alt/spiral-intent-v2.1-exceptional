@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 export async function GET() {
   const html = await readFile(
-    join(process.cwd(), "public", "matrix.html"),
+    join(process.cwd(), "public", "landing-approved.html"),
     "utf8",
   );
 
