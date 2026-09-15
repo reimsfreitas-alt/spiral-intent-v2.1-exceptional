@@ -17,7 +17,7 @@ export default function PortfolioPage() {
           Uma apresentação sobre história, decisões, padrões, memória e futuro — sem linguagem Enterprise e sem transformar a vida humana em dashboard.
         </p>
         <div style={{ border: "1px solid #263445", borderRadius: 14, overflow: "hidden", background: "#0b1118" }}>
-          <iframe src="/orbe.html" title="Orb — apresentação humana" style={{ display: "block", width: "100%", height: 980, border: 0, background: "#05070b" }} />
+          <iframe src="/spiral-orb-Rev1.html" title="Orb — apresentação humana" style={{ display: "block", width: "100%", height: 980, border: 0, background: "#05070b" }} />
         </div>
       </section>
     </main>
