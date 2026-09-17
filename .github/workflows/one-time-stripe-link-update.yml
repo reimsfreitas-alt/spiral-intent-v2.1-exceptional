@@ -1,0 +1,46 @@
+name: One-time Stripe link update
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.event.head_commit.message != 'Update Spiral Intent Stripe Payment Link'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Replace old Stripe Payment Link
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          old = 'https://buy.stripe.com/7sY00cdeP3445NJbejbbG08'
+          new = 'https://buy.stripe.com/eVq7sE8YzgUUgsn827bbG0b'
+          paths = [Path('index.html'), Path('public/landing-approved.html')]
+          changed = []
+          for path in paths:
+              if not path.exists():
+                  continue
+              text = path.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count:
+                  path.write_text(text.replace(old, new), encoding='utf-8')
+                  changed.append(f'{path}: {count}')
+          if not changed:
+              raise SystemExit('Old Stripe Payment Link not found in expected production files')
+          print('Updated: ' + ', '.join(changed))
+          PY
+
+      - name: Commit updated link and remove one-time workflow
+        run: |
+          git config user.name 'Spiral Codes'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html public/landing-approved.html .github/workflows/one-time-stripe-link-update.yml
+          git rm .github/workflows/one-time-stripe-link-update.yml
+          git commit -m 'Update Spiral Intent Stripe Payment Link'
+          git push
